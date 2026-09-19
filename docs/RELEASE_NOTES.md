@@ -1,5 +1,11 @@
 # Unreleased — TypeSafe + LLM drafting
 
+- **AI log (full transparency):** a live view of every TypeSafe Jev call and every drafting-engine call: exact requests (state, questions, prompts, CLI arguments and stdin), raw responses, per-option probability bars, validation verdicts, applied bucket, HTTP status, latency, tokens, CLI events/stderr and what each CLI adds on its own. Copy, export, filter and clear. Memory only (300 calls), redacted, cleared on lock, disconnect and restart. `GET /api/ai-log`, `GET /api/ai-log/{id}`, `GET /api/ai-log/export`, `POST /api/ai-log/clear`; "View in AI log" links after each Jev assessment and draft.
+- **Several drafting engines at once:** `DRAFT_ENGINES=auto` (CLIs found on PATH + openai when configured) or an explicit list; pick the engine per draft in the consent dialog; each draft is labeled with its engine. New **agy (Antigravity)** engine (sandboxed, schema-enforced, only its terminal `finish` step accepted). `DRAFT_ENGINE` still works.
+- **Mail display:** Gmail parts decoded with their declared charset (iso-8859-1 / windows-1252 accents fixed); HTML-only mail keeps paragraphs, lists and line breaks; named and numeric character references decoded; blank-line runs collapsed; links shown as their text. Optional **Formatted** view: sanitized HTML in a sandboxed frame with its own strict CSP (no scripts, forms or remote images/tracking pixels). Consent previews still send plain text.
+- Tests: `tests/ai-journal.test.mjs` (10), `tests/draft-engines.test.mjs` (5), `tests/mail-display.test.mjs` (4). Full suite: 186 of 188 pass locally; the 2 failures are the existing Windows `localhost`→`::1` Google Desktop tests.
+- agy 1.2.7 was checked live with one neutral prompt (a draft, and a question about its own context); Claude Code and Codex as before. No real message was drafted and no live TypeSafe call was made.
+
 - README (EN) and README.fr.md now lead with TypeSafe + AI: a new title and tagline, then **Why TypeSafe + AI**, which covers:
   - what Jev's typed judgments bring, grounded in docs.typesafe.ai and the local validators;
   - what a generative LLM brings;

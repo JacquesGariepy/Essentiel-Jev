@@ -15,7 +15,7 @@ TypeSafe présente Jev comme « le premier modèle System One », conçu pour «
 - **Des réponses typées plutôt que de la prose.** Jev répond en **Choice** (une option parmi des critères nommés), **Score** (un niveau sur une échelle) et **Noul** (une valeur de type oui/non entre 0 et 1). Pas de texte généré, pas d'analyse de texte : le résultat est une donnée, pas un paragraphe à interpréter.
 - **Probabilités et confiance.** Les réponses Choice et Score portent toute la distribution de probabilités. Selon TypeSafe, la `confidence` est « une statistique calculée à partir de la distribution de probabilités » ([confidence](https://docs.typesafe.ai/confidence)). Essentiel affiche les deux et renvoie les résultats peu sûrs vers une revue. Ses seuils (0,75 par défaut) sont provisoires et non calibrés sur vos données.
 - **Un contrat vérifié par le code avant usage.** Le validateur local refuse toute réponse dont le nombre ou le type est faux, dont les probabilités ne totalisent pas 1, dont le Choice n'est pas l'option la plus probable, ou dont le Score n'est pas la moyenne pondérée de son échelle. Une réponse invalide est refusée ; aucun résultat de remplacement n'est inventé.
-- **Traçabilité.** L'identité du modèle et l'usage de jetons renvoyés par TypeSafe sont conservés avec le résultat.
+- **Traçabilité.** L'identité du modèle et l'usage de jetons renvoyés par TypeSafe sont conservés avec le résultat, et chaque appel figure dans le **journal IA** (plus bas).
 - **Consentement à chaque envoi.** Chaque évaluation montre un aperçu modifiable du texte exact et exige son propre consentement. Aucune boîte de réception ni aucun corpus documentaire n'est transmis implicitement.
 - **Jamais d'autorité.** Une probabilité élevée n'est jamais un mandat d'agir. Jev ne peut rien envoyer, créer ni approuver.
 
@@ -26,7 +26,7 @@ TypeSafe indique que les modèles System One sont « entraînés pour des décis
 Les modèles System One « n'écrivent pas de réponses, ne produisent pas de code et ne génèrent pas d'explications ». C'est voulu, et c'est précisément là qu'un LLM génératif aide :
 
 - **Rédiger et résumer :** un brouillon de réponse courtois ou un résumé de 3 à 6 phrases d'un message, en français ou en anglais, selon votre consigne facultative (« formel », « décliner poliment »…).
-- **Le moteur de votre choix :** toute **API compatible OpenAI** (OpenAI, OpenRouter, Mistral, Groq…) ; un **LLM local** (Ollama, LM Studio, llama.cpp, vLLM), où le texte reste sur votre ordinateur et aucuns frais par requête ne sont facturés ; **Claude Code** ou **Codex**, qui réutilisent votre connexion existante et s'exécutent sans outils.
+- **Le moteur de votre choix, à chaque brouillon :** toute **API compatible OpenAI** (OpenAI, OpenRouter, Mistral, Groq…) ; un **LLM local** (Ollama, LM Studio, llama.cpp, vLLM), où le texte reste sur votre ordinateur et aucuns frais par requête ne sont facturés ; **Claude Code**, **Codex** ou **agy (Antigravity)**, qui réutilisent votre connexion existante et s'exécutent sans aucun outil autorisé. Proposez-en plusieurs à la fois (`DRAFT_ENGINES=auto` trouve les CLI installés sur ce poste) et choisissez-en un dans la fenêtre de consentement.
 - **Une sortie structurée et bornée :** le moteur doit renvoyer `{draft, notes}`. Les notes indiquent ce qu'il faut vérifier. Un appel d'outil, un champ en trop ou une réponse invalide est refusé.
 
 ### Comment ils travaillent ensemble
@@ -41,16 +41,28 @@ Serveur : écrit dans Gmail / Outlook / Tasks / Agenda puis relit             ag
 
 Aucun modèle n'envoie de courriel, ne crée d'objet ni n'approuve d'opération.
 
+### Transparence complète : le journal IA
+
+Le **journal IA** (dans les outils connectés) montre en direct chaque appel à TypeSafe Jev et au moteur de rédaction, tel qu'il a été envoyé et tel qu'il est revenu :
+
+- **Jev :** la requête exacte (l'état et chaque question avec ses critères), la réponse brute, chaque option avec sa barre de probabilité et le choix mis en évidence, les échelles Score, les valeurs Noul, la confiance, le verdict de la validation locale (et le contrôle en échec), le classement appliqué par le code local, le statut HTTP, la durée, l'identifiant de requête et les jetons.
+- **LLM :** la consigne système et le message exacts, le corps de la requête HTTP ou les arguments et l'entrée standard du CLI, ses événements, la sortie standard et les erreurs, la sortie brute, le brouillon et les notes validés, le motif d'un refus, la durée, les jetons et le coût déclaré par le CLI. Il indique aussi ce que chaque CLI ajoute de lui-même et qu'Essentiel ne peut pas désactiver (Claude Code : l'adresse courriel du compte, le système, la date, le chemin temporaire ; Codex : le chemin temporaire, le shell, la date, le fuseau horaire ; agy : le système, le shell, les chemins de ses dossiers, l'heure locale, le nom du modèle et une liste d'outils).
+- Copiez un appel en JSON, exportez tout le journal, filtrez-le ou videz-le. Le journal reste dans la mémoire du serveur local seulement : jamais écrit sur disque, vidé au verrouillage du coffre, à la déconnexion du compte concerné et au redémarrage. Les clés et jetons sont masqués ; les extraits transmis y figurent.
+
 | Moteur de rédaction (facultatif) | `.env` | Où va le texte |
 |---|---|---|
-| API compatible OpenAI | `DRAFT_ENGINE=openai`, `LLM_BASE_URL=https://…/v1`, `LLM_API_KEY`, `LLM_MODEL` | Le fournisseur configuré |
-| LLM local | `DRAFT_ENGINE=openai`, `LLM_BASE_URL=http://127.0.0.1:11434/v1` (Ollama), `LLM_MODEL` | Reste sur cet ordinateur |
-| Claude Code | `DRAFT_ENGINE=claude` (facultatif : `CLAUDE_MODEL`, `CLAUDE_MAX_BUDGET_USD`) | Anthropic, via votre connexion |
-| Codex | `DRAFT_ENGINE=codex` (facultatif : `CODEX_MODEL`) | OpenAI, via votre connexion |
+| Plusieurs à la fois | `DRAFT_ENGINES=auto` (CLI installés + `openai` s'il est configuré) ou `DRAFT_ENGINES=claude,codex,agy,openai` | Vous en choisissez un par brouillon |
+| API compatible OpenAI | `openai` avec `LLM_BASE_URL=https://…/v1`, `LLM_API_KEY`, `LLM_MODEL` | Le fournisseur configuré |
+| LLM local | `openai` avec `LLM_BASE_URL=http://127.0.0.1:11434/v1` (Ollama), `LLM_MODEL` | Reste sur cet ordinateur |
+| Claude Code | `claude` (facultatif : `CLAUDE_MODEL`, `CLAUDE_MAX_BUDGET_USD`) | Anthropic, via votre connexion |
+| Codex | `codex` (facultatif : `CODEX_MODEL`) | OpenAI, via votre connexion |
+| agy (Antigravity) | `agy` (facultatif : `AGY_MODEL`) | Google, via votre connexion |
+
+Un seul `DRAFT_ENGINE=…` fonctionne toujours.
 
 Installation, options exactes des CLI, contenu transmis et modèle de sécurité : [docs/LLM-DRAFTING.fr.md](docs/LLM-DRAFTING.fr.md). Jev (`TYPESAFE_API_KEY`, `JEV_MODEL`) et le moteur de rédaction sont tous deux facultatifs : les outils connectés fonctionnent sans aucune clé IA.
 
-**Limites honnêtes.** La confiance n'est pas l'exactitude. Un brouillon peut être faux ou inventer des détails : relisez-le. Un seul message est utilisé, jamais le fil complet. Les tests de cette version utilisent des fournisseurs synthétiques. Aucune inférence TypeSafe réelle ni aucune rédaction d'un vrai message n'a été effectuée. Les options de Claude Code et de Codex ont été vérifiées avec une seule invite triviale et non personnelle.
+**Limites honnêtes.** La confiance n'est pas l'exactitude. Un brouillon peut être faux ou inventer des détails : relisez-le. Un seul message est utilisé, jamais le fil complet. Les tests de cette version utilisent des fournisseurs synthétiques. Aucune inférence TypeSafe réelle ni aucune rédaction d'un vrai message n'a été effectuée. Les options de Claude Code, de Codex et d'agy ont été vérifiées avec des invites triviales et non personnelles.
 
 ## À propos de cette version
 
@@ -69,7 +81,7 @@ cp .env.example .env
 npm start
 ```
 
-Ouvrir `http://localhost:8787`. Sous PowerShell : `Copy-Item .env.example .env`, puis `npm start`. Le script `start-windows.cmd` est également fourni. La configuration OAuth se fait une fois par le développeur de l'application : [guide Google / Microsoft](docs/CONNECTORS.fr.md). Une clé IA n'est pas nécessaire pour les outils connectés : `TYPESAFE_API_KEY` active les jugements Jev, `DRAFT_ENGINE` active un LLM de rédaction facultatif ([guide](docs/LLM-DRAFTING.fr.md)).
+Ouvrir `http://localhost:8787`. Sous PowerShell : `Copy-Item .env.example .env`, puis `npm start`. Le script `start-windows.cmd` est également fourni. La configuration OAuth se fait une fois par le développeur de l'application : [guide Google / Microsoft](docs/CONNECTORS.fr.md). Une clé IA n'est pas nécessaire pour les outils connectés : `TYPESAFE_API_KEY` active les jugements Jev, `DRAFT_ENGINES` (ou `DRAFT_ENGINE`) active un ou plusieurs LLM de rédaction facultatifs ([guide](docs/LLM-DRAFTING.fr.md)).
 
 ## Parcours connectés implémentés
 
@@ -85,6 +97,8 @@ La page principale `/` ouvre Aujourd’hui. Une navigation commune donne accès 
 
 Les écritures sont réalisées côté serveur, autorisées par usage, approuvées explicitement et suivies d'une relecture de l'objet. Cette relecture confirme l'identifiant et certains états, pas l'envoi d'un message, l'accord d'une autre personne, l'égalité exhaustive de tous les champs ni la résolution du besoin métier. Une réponse perdue après une écriture reste incertaine ; aucune répétition aveugle n'est effectuée.
 
+Les messages ouverts se lisent correctement : chaque partie MIME est décodée selon son jeu de caractères déclaré (les courriels iso-8859-1 / windows-1252 n'affichent plus d'accents illisibles), les courriels uniquement HTML gardent leurs paragraphes, puces et retours à la ligne, et les références de caractères sont décodées. Un affichage **Mise en forme** facultatif montre le HTML assaini dans un cadre isolé soumis à sa propre politique stricte : aucun script, formulaire ni contenu actif, images distantes et pixels de suivi bloqués, liens ouverts dans un nouvel onglet. Ce que reçoivent Jev ou un LLM reste toujours le texte affiché dans l'aperçu de consentement.
+
 ## Les outils existants sont conservés
 
 Les outils locaux restent dans la même interface : 28 domaines facultatifs, 112 parcours, planification, argent, listes, carnet, décisions et laboratoire System One. Leurs données restent séparées du coffre connecté ; aucune copie automatique de tâches entre les deux n’est effectuée. Les fichiers `preview-*.html` sont des aperçus hors ligne des outils locaux ; les rubriques connectées y indiquent qu’un serveur est nécessaire.
@@ -95,7 +109,7 @@ Le serveur écoute seulement sur la boucle locale. Ce n'est pas une application 
 
 Les autorisations du fournisseur peuvent être plus larges que les boutons implémentés. Gmail compose permet techniquement l'envoi, même si Essentiel n'a aucune route d'envoi. Microsoft `Mail.Send` n'est pas demandé. Une déconnexion locale ne révoque pas le consentement et ne supprime pas les objets créés dans les services.
 
-Le moteur de rédaction facultatif se configure uniquement dans `.env`. Son point d'accès HTTP doit être en https, ou en http sur la boucle locale seulement. Claude Code et Codex s'exécutent comme processus enfants sans outils, dans un dossier temporaire vide, avec l'invite sur l'entrée standard et un environnement filtré ([détails](docs/LLM-DRAFTING.fr.md#modèle-de-sécurité)).
+Le moteur de rédaction facultatif se configure uniquement dans `.env`. Son point d'accès HTTP doit être en https, ou en http sur la boucle locale seulement. Claude Code, Codex et agy s'exécutent comme processus enfants sans aucun outil autorisé, dans un dossier temporaire vide, avec l'invite sur l'entrée standard et un environnement filtré ([détails](docs/LLM-DRAFTING.fr.md#modèle-de-sécurité)). Le journal IA reste dans la mémoire du serveur seulement et se vide au verrouillage, à la déconnexion et au redémarrage ; le cadre du courriel mis en forme n'est servi qu'à la page locale, dans un bac à sable, sous `default-src 'none'`.
 
 Aucun paiement, achat, réservation externe, envoi automatique, analyse de pièces jointes ou de fils complets, notification mobile, application mobile native, service autonome en arrière-plan, compte bancaire, foyer multiutilisateur ou exécution générique MCP/navigateur n'est implémenté. La disponibilité des calendriers est limitée au périmètre lu et n'est pas une réservation atomique. Aucun gain de temps, gain financier, taux de rétention ou désir universel n'a été mesuré.
 

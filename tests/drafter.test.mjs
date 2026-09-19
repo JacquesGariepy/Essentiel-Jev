@@ -25,7 +25,7 @@ test('drafter: LLM_BASE_URL accepts https anywhere and http only on loopback', (
 });
 
 test('drafter: configuration defaults to none and never describes secrets, URLs or commands', () => {
-  assert.deepEqual(createDrafter({ env: {} }).describe(), { engine: 'none', model: '', local: false, configured: false });
+  const none = createDrafter({ env: {} }).describe(); assert.deepEqual({ engine: none.engine, model: none.model, local: none.local, configured: none.configured, engines: none.engines, default: none.default }, { engine: 'none', model: '', local: false, configured: false, engines: [], default: 'none' });
   assert.equal(draftConfig({ DRAFT_ENGINE: 'gpt' }).configured, false);
   assert.equal(draftConfig({ DRAFT_ENGINE: 'openai', LLM_BASE_URL: 'https://api.example.com/v1' }).configured, false);
   assert.equal(draftConfig({ DRAFT_ENGINE: 'claude', CLAUDE_COMMAND: 'C:\\tools\\claude.cmd' }).configured, false);
@@ -44,7 +44,7 @@ test('drafter: request bounds are enforced before any engine call', () => {
 test('drafter: OpenAI-compatible call uses the configured base, strict json_schema and no key for local servers', async () => {
   const calls = [];
   const drafter = createDrafter({ env: openaiEnv(), fetchImpl: async (url, init) => { calls.push({ url, init }); return reply('```json\n{"draft":"Bonjour, c’est confirmé [à confirmer].","notes":["Vérifier la date"]}\n```'); } });
-  assert.deepEqual(drafter.describe(), { engine: 'openai', model: 'llama3.2', local: true, configured: true });
+  const d = drafter.describe(); assert.deepEqual({ engine: d.engine, model: d.model, local: d.local, configured: d.configured }, { engine: 'openai', model: 'llama3.2', local: true, configured: true }); assert.deepEqual(d.engines, [{ id: 'openai', label: 'OpenAI-compatible API', model: 'llama3.2', local: true, configured: true }]); assert.equal(d.default, 'openai');
   const result = await drafter.draft(request);
   assert.deepEqual(result, { draft: 'Bonjour, c’est confirmé [à confirmer].', notes: ['Vérifier la date'], engine: 'openai', model: 'llama3.2:latest' });
   const [{ url, init }] = calls, body = JSON.parse(init.body);
@@ -134,7 +134,7 @@ test('drafter HTTP: config describes the engine without key or URL; unexpected e
   const drafter = createDrafter({ env: openaiEnv({ LLM_BASE_URL: 'https://secret-host.example/v1', LLM_API_KEY: 'sk-secret-123' }), fetchImpl: async () => { throw new Error('never'); } });
   await withServer({ apiKey: '', drafter }, async base => {
     const text = await (await fetch(base + '/api/config')).text();
-    assert.ok(!text.includes('secret-host') && !text.includes('sk-secret-123')); assert.deepEqual(JSON.parse(text).draft, { engine: 'openai', model: 'llama3.2', local: false, configured: true });
+    assert.ok(!text.includes('secret-host') && !text.includes('sk-secret-123')); const d = JSON.parse(text).draft; assert.deepEqual({ engine: d.engine, model: d.model, local: d.local, configured: d.configured }, { engine: 'openai', model: 'llama3.2', local: false, configured: true }); assert.deepEqual(d.engines.map(e => e.id), ['openai']); assert.equal(d.default, 'openai');
   });
   await withServer({ apiKey: '', drafter: { describe: () => ({ configured: true }), draft: async () => { throw new Error('C:\\Users\\someone\\secret stderr'); } } }, async base => {
     const r = await post(base, { ...request, consent: true }), body = await r.json();

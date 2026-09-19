@@ -35,7 +35,7 @@ Optional drafting branch: displayed source excerpt -> separate consent -> operat
 | Module | Responsibility |
 |---|---|
 | `server.mjs` | Fixed static routes, HTTP guards, connected API and legacy Jev endpoints |
-| `lib/connected/common.mjs` | Validation, timezone conversion, free windows, safe links, text/MIME helpers |
+| `lib/connected/common.mjs` | Validation, timezone conversion, free windows, safe links, text/MIME helpers, charset decoding, HTML-to-text, HTML entity decoding, formatted-mail sanitizer |
 | `lib/connected/vault.mjs` | Memory store, optional scrypt + AES-GCM persistence, lock/unlock/erase |
 | `lib/connected/oauth.mjs` | Provider config, scope mapping, PKCE/state/cookie, token refresh |
 | `lib/connected/providers.mjs` | Fixed-origin Google/Graph requests, normalized reads and narrow writes |
@@ -44,7 +44,8 @@ Optional drafting branch: displayed source excerpt -> separate consent -> operat
 | `lib/connected/provider-errors.mjs` | Allowlisted provider diagnostics and fixed Google console URLs |
 | `public/app.js`, `public/core.js`, `public/systemone.js` | Existing local tools and System One lab |
 | `lib/provider.mjs`, `lib/domain.mjs`, `lib/questions.mjs` | Existing TypeSafe adapter, typed validation, deterministic policy |
-| `lib/drafter.mjs` | Optional drafting engines: OpenAI-compatible HTTP, Claude Code and Codex CLI children; `{draft, notes}` validation; no judgment or write authority |
+| `lib/drafter.mjs` | Optional drafting engines, several at once (`DRAFT_ENGINES`): OpenAI-compatible HTTP, Claude Code, Codex and agy CLI children; `{draft, notes}` validation; no judgment or write authority |
+| `lib/ai-journal.mjs` | Local AI activity journal: exact Jev and drafting exchanges, redacted, memory-only ring buffer (300 calls) |
 
 ## Unified navigation
 
@@ -64,7 +65,8 @@ All `/api/connected/*` calls require `X-Essentiel-Request: 1`. All POST calls al
 | POST `/api/connected/sync` | Bounded mail/calendar/task reads for one authorized account |
 | POST `/api/connected/diagnostics` | One minimal authorized GET per service; safe report; no provider writes |
 | POST `/api/connected/selection` | Select returned calendars and native task list |
-| POST `/api/connected/message` | Fetch one known message's capped plain-text body |
+| POST `/api/connected/message` | Fetch one known message's capped plain-text body (declared charsets decoded; sanitized HTML kept in memory for the formatted view) |
+| GET `/mail-view/{google|microsoft}/{id}` | Formatted view of an opened message: sanitized HTML, served only as a same-origin frame (`Sec-Fetch-Dest: iframe`), own CSP `default-src 'none'` without scripts or remote images, framed with `sandbox` by the page |
 | POST `/api/connected/files` | Native remote metadata search |
 | POST `/api/connected/slots` | Fresh, bounded selected-calendar read and deterministic free-window calculation |
 | POST `/api/connected/actions/preview` | Validate and retain immutable action payload/source binding |
@@ -86,9 +88,20 @@ Read-back validates an object identifier and selected state conditions. It does 
 
 For calendars, incomplete pagination, disappeared selected calendars, missing permissions or request errors stop availability confirmation. The algorithm considers only returned selected calendars. It cannot reserve across independent clients atomically, infer travel time, inspect unknown accounts or determine another person's availability.
 
+AI log routes (same local guards: `X-Essentiel-Request`; exact Origin for POST):
+
+| Method and route | Purpose |
+|---|---|
+| GET `/api/ai-log?after=<rev>` | Compact summaries created or changed after a revision; `epoch` changes when the log is cleared |
+| GET `/api/ai-log/{id}` | One full entry: exact request, raw response, per-option probabilities, validation, CLI arguments/events, timing, tokens |
+| GET `/api/ai-log/export` | All full entries as JSON |
+| POST `/api/ai-log/clear` | Empty the journal |
+
+`/api/analyze`, `/api/evaluate`, `/api/models` and `/api/draft` return an `aiLogId`. `/api/config.draft` lists the offered engines (`engines`, `default`) and keeps the legacy single-engine fields for the default.
+
 ## Storage separation
 
-Connected vault: provider tokens, bounded source snapshots, selections, actions and technical diagnostics. `.env`: operator application secrets, not vault-encrypted. Browser: optional local workspace storage uses the existing `essentiel.workspace.v2` key; the same workspace owns language/theme. Connected account content is not copied into that local workspace or its exports. Browser renders connected data from server snapshots; account tokens remain server-side. Provider: original objects and approved writes. TypeSafe: only separately consented text/state. Erasing the connected vault does not erase local workspace data, and erasing local workspace data does not remove provider objects.
+Connected vault: provider tokens, bounded source snapshots, selections, actions and technical diagnostics. Server memory only: the AI log and the sanitized HTML of the last 30 opened messages; both are cleared on lock, erase and account disconnect (and on restart). `.env`: operator application secrets, not vault-encrypted. Browser: optional local workspace storage uses the existing `essentiel.workspace.v2` key; the same workspace owns language/theme. Connected account content is not copied into that local workspace or its exports. Browser renders connected data from server snapshots; account tokens remain server-side. Provider: original objects and approved writes. TypeSafe: only separately consented text/state. Erasing the connected vault does not erase local workspace data, and erasing local workspace data does not remove provider objects.
 
 ## Diagnostics and failure states
 

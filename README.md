@@ -15,7 +15,7 @@ TypeSafe describes Jev as "the first System One model", built "to make fast, str
 - **Typed answers instead of prose.** Jev answers **Choice** (one option among named criteria), **Score** (a level on a scale) and **Noul** (a yes/no-style value between 0 and 1). "No text generation, no parsing": the result is data, not a paragraph to interpret.
 - **Probabilities and confidence.** Choice and Score answers carry the full probability distribution. According to TypeSafe, `confidence` "is a statistic computed from the probability distribution" ([confidence](https://docs.typesafe.ai/confidence)). Essentiel shows both and routes low-confidence results to review. Its thresholds (0.75 by default) are provisional and not calibrated on your data.
 - **A contract checked by code before use.** The local validator refuses any answer whose count or type is wrong, whose probabilities do not sum to 1, whose Choice is not the most probable option, or whose Score is not the weighted mean of its scale. A malformed response is refused; no substitute result is invented.
-- **Traceability.** The model identity and token usage returned by TypeSafe are kept with the result.
+- **Traceability.** The model identity and token usage returned by TypeSafe are kept with the result, and every call appears in the **AI log** (below).
 - **Consent per transmission.** Every assessment shows an editable preview of the exact text and needs its own consent. No mailbox or document corpus is sent implicitly.
 - **Never authority.** A high probability is never a mandate to act. Jev cannot send, create or approve anything.
 
@@ -26,7 +26,7 @@ TypeSafe states that System One models "are trained for calibrated decisions" ([
 System One models "do not write replies, produce code, or generate explanations". That is deliberate, and it is exactly where a generative LLM helps:
 
 - **Drafting and summarizing:** a courteous reply draft or a 3–6 sentence summary of one message, in French or English, following your optional instruction ("formal", "decline politely"…).
-- **Your choice of engine:** any **OpenAI-compatible API** (OpenAI, OpenRouter, Mistral, Groq…); a **local LLM** (Ollama, LM Studio, llama.cpp, vLLM), where the text stays on your computer and no per-request provider fee applies; **Claude Code** or **Codex**, which reuse your existing sign-in and run with no tools.
+- **Your choice of engine, per draft:** any **OpenAI-compatible API** (OpenAI, OpenRouter, Mistral, Groq…); a **local LLM** (Ollama, LM Studio, llama.cpp, vLLM), where the text stays on your computer and no per-request provider fee applies; **Claude Code**, **Codex** or **agy (Antigravity)**, which reuse your existing sign-in and run with no tool allowed. Offer several at once (`DRAFT_ENGINES=auto` finds the CLIs installed on this computer) and pick one in the consent dialog.
 - **Structured, bounded output:** the engine must return `{draft, notes}`. The notes list what you should verify. A tool call, extra field or malformed reply is refused.
 
 ### How they work together
@@ -41,16 +41,28 @@ Server: writes to Gmail / Outlook / Tasks / Calendar, then reads back   acting +
 
 No model sends mail, creates an object or approves an operation.
 
+### Full transparency: the AI log
+
+**AI log** (in the connected tools) shows every call to TypeSafe Jev and to a drafting engine, live, as it was sent and as it came back:
+
+- **Jev:** the exact request (state and every question with its criteria), the raw response, each option with its probability bar and the chosen one highlighted, Score legends, Noul values, confidence, the local validation verdict (and which check failed), the bucket applied by local code, HTTP status, latency, request ID and tokens.
+- **LLMs:** the exact system prompt and message sent, the HTTP request body or the CLI arguments and stdin, CLI events, stdout/stderr, the raw output, the validated draft and notes, the rejection reason, latency, tokens and the cost a CLI reports. It also lists what each CLI adds on its own and Essentiel cannot switch off (Claude Code: your account email address, OS, date, temporary path; Codex: temporary path, shell, date, time zone; agy: OS, shell, its folder paths, local time, model name and a tool catalogue).
+- Copy one call as JSON, export the whole log, filter it, or clear it. The log lives in the local server's memory only: never written to disk, cleared when the vault locks, when the related account disconnects and on restart. Keys and tokens are masked; the transmitted excerpts are included.
+
 | Drafting engine (optional) | `.env` | Where the text goes |
 |---|---|---|
-| OpenAI-compatible API | `DRAFT_ENGINE=openai`, `LLM_BASE_URL=https://…/v1`, `LLM_API_KEY`, `LLM_MODEL` | The configured provider |
-| Local LLM | `DRAFT_ENGINE=openai`, `LLM_BASE_URL=http://127.0.0.1:11434/v1` (Ollama), `LLM_MODEL` | Stays on this computer |
-| Claude Code | `DRAFT_ENGINE=claude` (optional `CLAUDE_MODEL`, `CLAUDE_MAX_BUDGET_USD`) | Anthropic, through your sign-in |
-| Codex | `DRAFT_ENGINE=codex` (optional `CODEX_MODEL`) | OpenAI, through your sign-in |
+| Several at once | `DRAFT_ENGINES=auto` (installed CLIs + `openai` when configured) or `DRAFT_ENGINES=claude,codex,agy,openai` | You pick one per draft |
+| OpenAI-compatible API | `openai` with `LLM_BASE_URL=https://…/v1`, `LLM_API_KEY`, `LLM_MODEL` | The configured provider |
+| Local LLM | `openai` with `LLM_BASE_URL=http://127.0.0.1:11434/v1` (Ollama), `LLM_MODEL` | Stays on this computer |
+| Claude Code | `claude` (optional `CLAUDE_MODEL`, `CLAUDE_MAX_BUDGET_USD`) | Anthropic, through your sign-in |
+| Codex | `codex` (optional `CODEX_MODEL`) | OpenAI, through your sign-in |
+| agy (Antigravity) | `agy` (optional `AGY_MODEL`) | Google, through your sign-in |
+
+A single `DRAFT_ENGINE=…` still works.
 
 Setup, exact CLI flags, what is sent and the security model are in [docs/LLM-DRAFTING.md](docs/LLM-DRAFTING.md). Jev (`TYPESAFE_API_KEY`, `JEV_MODEL`) and the drafting engine are both optional: the connected tools work without any AI key.
 
-**Honest limits.** Confidence is not correctness. A draft can be wrong or invent details, so read it. Only one message is used, never the whole thread. This build's tests use synthetic providers. No live TypeSafe inference and no real-message drafting were performed. The Claude Code and Codex flags were checked with one trivial, non-personal prompt.
+**Honest limits.** Confidence is not correctness. A draft can be wrong or invent details, so read it. Only one message is used, never the whole thread. This build's tests use synthetic providers. No live TypeSafe inference and no real-message drafting were performed. The Claude Code, Codex and agy flags were checked with trivial, non-personal prompts.
 
 ## About this build
 
@@ -69,7 +81,7 @@ cp .env.example .env
 npm start
 ```
 
-Open `http://localhost:8787`. Windows: `Copy-Item .env.example .env`, then `npm start`, or use `start-windows.cmd`. OAuth app registration is a one-time developer responsibility; [configure Google/Microsoft](docs/CONNECTORS.md) before authorizing accounts. An AI key is optional: `TYPESAFE_API_KEY` enables Jev judgments, `DRAFT_ENGINE` enables an optional drafting LLM ([guide](docs/LLM-DRAFTING.md)).
+Open `http://localhost:8787`. Windows: `Copy-Item .env.example .env`, then `npm start`, or use `start-windows.cmd`. OAuth app registration is a one-time developer responsibility; [configure Google/Microsoft](docs/CONNECTORS.md) before authorizing accounts. An AI key is optional: `TYPESAFE_API_KEY` enables Jev judgments, `DRAFT_ENGINES` (or `DRAFT_ENGINE`) enables an optional drafting LLM ([guide](docs/LLM-DRAFTING.md)).
 
 ## Implemented connected workflows
 
@@ -85,6 +97,8 @@ The main `/` page opens Today. A shared navigation includes connected mail, cale
 
 Native writes are server-side, scoped, explicitly approved and followed by an object read-back. Read-back confirms the identified object and selected state checks, not message delivery, recipient agreement, correctness of every payload field or task outcome. A response lost after a write remains uncertain rather than being retried blindly.
 
+Opened messages read cleanly: every MIME part is decoded with its declared charset (iso-8859-1 / windows-1252 mail no longer shows garbled accents), HTML-only mail keeps its paragraphs, list items and line breaks, and character references are decoded. An optional **Formatted** view shows the sanitized HTML in a sandboxed frame with its own strict policy: no script, form or active content, remote images and tracking pixels blocked, links opening in a new tab. What Jev or an LLM receives is always the plain text you see in the consent preview.
+
 ## Existing local tools remain
 
 All local tools remain within the same interface: 28 optional domains, 112 workflows, planning, money, lists, notebook, decisions and the System One lab. Their data stays separate from the connected vault; local tasks are not automatically copied to Google/Microsoft. `/workspace` remains an alias. `preview-*.html` files are offline local-tool previews; connected sections explain that a local server is required.
@@ -95,7 +109,7 @@ The server binds only to loopback. It is not a hosted multiuser application. OAu
 
 Permission grants can be broader than the UI operations. Gmail compose permits sending at the provider, although this app has no send route. Microsoft `Mail.Send` is not requested. Disconnecting locally does not revoke provider consent or delete objects already created in native tools.
 
-The optional drafting engine is configured only in `.env`. Its HTTP endpoint must be https, or http on loopback only. Claude Code / Codex run as child processes without tools, in an empty temporary folder, with the prompt on stdin and an allowlisted environment ([details](docs/LLM-DRAFTING.md#security-model)).
+The optional drafting engine is configured only in `.env`. Its HTTP endpoint must be https, or http on loopback only. Claude Code / Codex / agy run as child processes with no tool allowed, in an empty temporary folder, with the prompt on stdin and an allowlisted environment ([details](docs/LLM-DRAFTING.md#security-model)). The AI log is held in server memory only and is cleared on lock, disconnect and restart; the formatted mail frame is served only to the local page, inside a sandbox, under `default-src 'none'`.
 
 No payments, purchases, booking service, automatic mail sending, full-thread or attachment analysis, mobile push, native mobile app, background daemon, bank feeds, household multiuser sharing, autonomous agent loop or generic MCP/browser-control execution is implemented. Calendar availability is scoped, bounded and not an atomic reservation. No universal demand, time saved, money recovered or real-user retention has been established.
 

@@ -4,3 +4,31 @@
 @media(max-width:1050px){:root{--sidebar:200px}main{padding:28px 24px}.topbar{padding:0 24px}.heading{flex-direction:column}.cards{gap:14px}}
 @media(max-width:760px){.shell{display:block}.rail{position:static;width:100%;padding:16px 16px 10px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:0 0 12px;font-size:23px}.rail .caption,.rail-note,.rail-bottom{display:none}.rail nav{display:flex;overflow:auto;gap:4px}.nav{width:auto;flex:0 0 auto;gap:7px;padding:9px 11px;font-size:12px}.nav .glyph{width:15px;height:15px;flex-basis:15px}.main-wrap{margin-left:0}.topbar{height:auto;min-height:59px;padding:10px 18px;flex-wrap:wrap}.topbar .status-label{font-size:11px}.topbar .right{gap:6px}.topbar .btn{padding:7px 10px;font-size:12px;min-height:34px}main{padding:25px 18px 45px}.metrics{gap:8px}.metric{padding:13px}.metric strong{font-size:24px}.metric span{font-size:11px}.cards,.two{grid-template-columns:1fr}.heading{gap:15px}.card{padding:18px}.row{gap:10px}.row-side{max-width:80px;font-size:11px}.kv{grid-template-columns:1fr;gap:3px}.kv dd{margin-bottom:10px}.dialog-heading h2{font-size:18px}#dialogBody{padding:19px}.btn{font-size:13px}}
 @media(prefers-reduced-motion:no-preference){.btn,.nav{transition:background .14s,border-color .14s}dialog[open]{animation:reveal .14s ease-out}@keyframes reveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+/* AI log: exact Jev and drafting-engine exchanges. */
+.ailog-filter{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:0 0 16px}
+.ailog-filter label{min-width:170px}
+.ailog{display:grid;grid-template-columns:minmax(260px,1fr) minmax(0,2fr);gap:18px;align-items:start}
+.ailog-list{padding:8px;max-height:75vh;overflow:auto}
+.ailog-row{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);border-radius:var(--small-radius);padding:10px 12px;color:inherit}
+.ailog-row:hover{background:var(--surface-alt)}
+.ailog-row.active{background:var(--accent-soft)}
+.ailog-row-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ailog-row-label{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ailog-detail{min-width:0}
+.ailog-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.ailog-title{margin:18px 0 8px}
+.ailog-answer{border:1px solid var(--line);border-radius:var(--small-radius);padding:12px 14px;margin:10px 0}
+.ailog-answer-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ailog-choice{font-weight:600;margin:6px 0}
+.prob-line{display:grid;grid-template-columns:minmax(0,2fr) minmax(80px,1fr) 64px;gap:10px;align-items:center;font-size:13px;padding:3px 6px;border-radius:6px}
+.prob-line.chosen{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.prob-line progress{width:100%;height:10px;accent-color:var(--accent)}
+.prob-line strong{text-align:right;font-variant-numeric:tabular-nums}
+.ailog-block{margin:10px 0}
+.ailog-block summary{cursor:pointer;font-weight:600;font-size:13px}
+.ailog-block pre{max-height:420px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:900px){.ailog{grid-template-columns:1fr}.ailog-list{max-height:40vh}}
+/* Message display: readable text by default, optional isolated formatted frame. */
+.mail-text{max-height:60vh;word-break:break-word;font-size:14px;line-height:1.6}
+.mail-toggle{margin-top:12px}
+.mail-frame{display:block;width:100%;height:60vh;border:1px solid var(--line);border-radius:var(--small-radius);background:#fff;margin:14px 0}

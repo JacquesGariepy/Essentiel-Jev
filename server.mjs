@@ -11,6 +11,7 @@ import { askJev, listJevModels } from './lib/provider.mjs';
 import { validateRequest, validateTypedAnswers, SYSTEMONE_LIMITS } from './public/systemone.js';
 import { demoRecords, DEMO_GOALS } from './lib/demo.mjs';
 import { createDrafter, validateDraftRequest, DraftError } from './lib/drafter.mjs';
+import { createJournal, explainAnswers, AI_LOG_LIMITS } from './lib/ai-journal.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 if (existsSync(path.join(root, '.env'))) process.loadEnvFile(path.join(root, '.env'));
@@ -31,6 +32,19 @@ const staticFiles = new Map([
   ['/app.js', ['public/app.js', 'text/javascript; charset=utf-8']],
   ['/styles.css', ['public/styles.css', 'text/css; charset=utf-8']]
 ]);
+const JEV_ENDPOINT = 'https://api.typesafe.ai/v1/systemone', SECRET_ENV = ['TYPESAFE_API_KEY', 'LLM_API_KEY', 'GOOGLE_CLIENT_SECRET', 'MICROSOFT_CLIENT_SECRET', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY'];
+// Formatted mail frame: no script, no remote image or font (tracking pixels), no form, no plugin; links may only open a new tab.
+const MAIL_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox";
+const MAIL_FRAME = html => `<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>body{margin:14px;font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#182333;background:#fff;overflow-wrap:anywhere}img{max-width:100%;height:auto}table{max-width:100%}</style></head><body>${html}</body></html>`;
+// Engines offered by a drafter; an injected drafter may still describe a single engine (legacy shape).
+const offeredEngines = d => d?.engines || (d?.configured ? [{ id: d.engine || 'default', label: d.engine || 'default', model: d.model || '', local: Boolean(d.local), configured: true }] : []);
+const sourceOf = body => ['google', 'microsoft'].includes(body?.sourceProvider) ? body.sourceProvider : 'local';
+const engineOf = d => ({ claude: 'Claude Code', codex: 'Codex', agy: 'agy (Antigravity)', openai: d?.local ? 'OpenAI-compatible (local)' : 'OpenAI-compatible (remote)' })[d?.engine] || 'drafting engine';
+// HTTP attempts for the journal; the successful body is kept once, as rawResponse.
+const httpOf = t => t?.attempts ? { endpoint: t.endpoint, method: t.method, attempts: t.attempts.map(({ body, ...a }) => a.status >= 200 && a.status < 300 ? a : { ...a, ...(body ? { body } : {}) }) } : undefined;
+const rawOf = t => t?.attempts?.find(a => a.status >= 200 && a.status < 300)?.body;
+// Token usage reported by a drafting engine: Claude Code result, OpenAI-compatible body, or Codex turn.completed event.
+const draftUsage = t => { let u = t?.result?.usage || t?.events?.findLast?.(e => e?.type === 'turn.completed')?.usage; if (!u && t?.rawResponse) try { u = JSON.parse(t.rawResponse).usage; } catch {} const i = u?.input_tokens ?? u?.prompt_tokens, o = u?.output_tokens ?? u?.completion_tokens; return Number.isFinite(i) || Number.isFinite(o) ? { input_tokens: Number.isFinite(i) ? i : null, output_tokens: Number.isFinite(o) ? o : null } : null; };
 function json(res, status, data) {
   res.writeHead(status, { ...headers, 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(data));
@@ -49,6 +63,9 @@ async function readJson(req) {
 
 export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model = process.env.JEV_MODEL || 'jev-1.13.0', provider = askJev, modelsProvider = listJevModels, drafter = createDrafter(), connectorOptions = {} } = {}) {
   const connected = new ConnectedService({ filename: path.join(root, '.data', 'connected.vault'), ...connectorOptions });
+  // Local AI activity journal: memory only, secrets redacted before storage (keys, OAuth client secrets, account tokens).
+  const accountSecrets = () => { try { const clients = Object.values(connected.oauth?.config || {}).map(c => c.clientSecret); if (connected.vault.status().locked) return clients; return [...clients, ...Object.values(connected.vault.state().accounts || {}).flatMap(a => [a.accessToken, a.refreshToken])]; } catch { return []; } };
+  const journal = createJournal({ secrets: () => [apiKey, ...SECRET_ENV.map(k => process.env[k]), ...(drafter.secrets?.() || []), ...accountSecrets()] });
   let active = 0;
   const calls = [];
   const server = http.createServer(async (req, res) => {
@@ -99,9 +116,9 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
         try {
           if(route==='vault'){
             if(body.action==='erase' && body.confirm!=='ERASE')return json(res,400,{error:'Explicit ERASE confirmation required.'});
-            return json(res,200,await connected.manageVault(body.action,body.password));
+            const out=await connected.manageVault(body.action,body.password);if(['lock','erase'].includes(body.action))journal.clear();return json(res,200,out);
           }
-          if(route==='disconnect')return json(res,200,await connected.disconnect(body.provider));
+          if(route==='disconnect'){const out=await connected.disconnect(body.provider);journal.clear(e=>e.source===body.provider);return json(res,200,out);}
           if(route==='oauth/start'){
             const auth=await connected.run(()=>connected.oauth.start(body.provider,body.features,req.headers.origin));
             if(auth.cookie)res.setHeader('Set-Cookie',auth.cookie);return json(res,200,{url:auth.url,requested:auth.requested});
@@ -122,6 +139,26 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
           return json(res,200,result);
         } catch(error){return json(res,error.status||400,{error:error.message,code:error.code||'CONNECTOR_ERROR',...(safeDiagnostic(error)?{diagnostic:safeDiagnostic(error)}:{})});}
       }
+      const mailView = /^\/mail-view\/(google|microsoft)\/([^/]{1,4000})$/.exec(url.pathname);
+      if (req.method === 'GET' && mailView) {
+        // Served only as a same-origin frame of the local page; the page adds sandbox, this response adds its own strict CSP.
+        if (req.headers['sec-fetch-dest'] !== 'iframe' || req.headers['sec-fetch-site'] !== 'same-origin') return json(res, 403, { error: 'Formatted mail is only served to the local page, inside a sandboxed frame.', code: 'FRAME_ONLY' });
+        let html; try { html = connected.mailView(mailView[1], decodeURIComponent(mailView[2])); } catch (error) { return json(res, error.status || 400, { error: error.message, code: error.code || 'INVALID_REQUEST' }); }
+        if (!html) return json(res, 404, { error: 'Open the message again to load its formatted version.', code: 'NOT_FOUND' });
+        res.writeHead(200, { ...headers, 'Content-Type': 'text/html; charset=utf-8', 'X-Frame-Options': 'SAMEORIGIN', 'Content-Security-Policy': MAIL_CSP });
+        return res.end(MAIL_FRAME(html));
+      }
+      if (url.pathname === '/api/ai-log' || url.pathname.startsWith('/api/ai-log/')) {
+        // Local transparency: exact requests and responses of Jev and drafting calls. Same local guards as the connector API.
+        const origins = new Set([`http://127.0.0.1:${port}`, `http://localhost:${port}`]);
+        if (req.headers['x-essentiel-request'] !== '1' || (req.method !== 'GET' && !origins.has(req.headers.origin))) return json(res, 403, { error: 'Same-origin request required.', code: 'ORIGIN_REJECTED' });
+        const rest = url.pathname.slice('/api/ai-log'.length), entry = /^\/(AI\d{6,})$/.exec(rest);
+        if (req.method === 'GET' && rest === '') return json(res, 200, journal.list(url.searchParams.get('after') || 0));
+        if (req.method === 'GET' && rest === '/export') return json(res, 200, { app: 'Essentiel', exportedAt: new Date().toISOString(), note: 'Local AI activity journal (memory only). Secrets are redacted, but source excerpts are included: protect this file.', entries: journal.all() });
+        if (req.method === 'GET' && entry) { const e = journal.get(entry[1]); return e ? json(res, 200, e) : json(res, 404, { error: `Entry not found. The journal keeps the last ${AI_LOG_LIMITS.entries} calls in memory.`, code: 'NOT_FOUND' }); }
+        if (req.method === 'POST' && rest === '/clear') { await readJson(req); const cleared = journal.clear(); return json(res, 200, { cleared, ...journal.list(0) }); }
+        return json(res, 404, { error: 'Route introuvable.', code: 'NOT_FOUND' });
+      }
       if (req.method === 'GET' && staticFiles.has(url.pathname)) {
         const [filename, type] = staticFiles.get(url.pathname);
         res.writeHead(200, { ...headers, 'Content-Type': type });
@@ -129,7 +166,7 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
       }
       if (req.method === 'GET' && url.pathname === '/api/config') {
         return json(res, 200, { configured: Boolean(apiKey), model, ruleset: RULESET_VERSION,
-          nativeEndpoint: 'api.typesafe.ai', retention: 'Legacy workspace: browser-only. Connected accounts: server memory or optional encrypted local vault', maxTextLength: 8000, systemOneLimits: SYSTEMONE_LIMITS, maxRequestBytes: 350000, automaticExternalActions: false, draft: drafter.describe() });
+          nativeEndpoint: 'api.typesafe.ai', retention: 'Legacy workspace: browser-only. Connected accounts: server memory or optional encrypted local vault', maxTextLength: 8000, systemOneLimits: SYSTEMONE_LIMITS, maxRequestBytes: 350000, automaticExternalActions: false, draft: drafter.describe(), aiLog: { capacity: AI_LOG_LIMITS.entries, memoryOnly: true } });
       }
       if (req.method === 'GET' && url.pathname === '/api/demo') {
         const today = url.searchParams.get('today');
@@ -148,32 +185,52 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
         while (calls.length && calls[0] < now - 60000) calls.shift();
         if (calls.length >= 60) return json(res, 429, { error: 'Local limit: 60 logical provider requests per minute.' });
         calls.push(now); active++;
+        const trace = {}, logId = journal.start(request
+          ? { route: url.pathname, kind: 'typesafe.evaluate', engine: 'TypeSafe Jev', source: sourceOf(body), label: `${Object.keys(request.questions).length} question(s)`, modelRequested: model, request: { endpoint: JEV_ENDPOINT, method: 'POST', body: { model, state: request.state, questions: request.questions } } }
+          : { route: url.pathname, kind: 'typesafe.models', engine: 'TypeSafe Jev', source: 'local', label: 'models', request: { endpoint: 'https://api.typesafe.ai/v1/models', method: 'GET' } });
+        let raw, stage = 'provider';
         try {
-          if (!request) return json(res, 200, await modelsProvider({ apiKey }));
-          const raw = await provider({ apiKey, model, ...request });
+          if (!request) { const out = await modelsProvider({ apiKey, trace }); journal.update(logId, { status: 'ok', http: trace, response: out }); return json(res, 200, { ...out, aiLogId: logId }); }
+          raw = await provider({ apiKey, model, ...request, trace });
+          journal.update(logId, { response: raw, rawResponse: rawOf(trace), http: httpOf(trace), modelReturned: typeof raw?.model === 'string' ? raw.model : '', usage: raw?.usage ?? null });
+          stage = 'validation';
           const answers = validateTypedAnswers(raw, request.questions);
           if (typeof raw.model !== 'string' || !raw.model.trim() || raw.model.length > 200) throw new Error('Missing provider model identity.');
           if (!raw.usage || !Number.isSafeInteger(raw.usage.input_tokens) || raw.usage.input_tokens < 0 || (raw.usage.output_tokens !== undefined && (!Number.isSafeInteger(raw.usage.output_tokens) || raw.usage.output_tokens < 0))) throw new Error('Invalid provider token usage.');
-          return json(res, 200, { model: raw.model, answers, usage: { input_tokens: raw.usage.input_tokens, ...(raw.usage.output_tokens === undefined ? {} : { output_tokens: raw.usage.output_tokens }) } });
-        } catch (error) { return json(res, 502, { error: error instanceof Error ? error.message : 'Provider evaluation failed. No synthetic replacement.' }); }
+          journal.update(logId, { status: 'ok', validation: { ok: true, checks: 'typed answer contract, probability sums, argmax/weighted mean, model identity, token usage' }, answers: explainAnswers(request.questions, answers) });
+          return json(res, 200, { model: raw.model, answers, usage: { input_tokens: raw.usage.input_tokens, ...(raw.usage.output_tokens === undefined ? {} : { output_tokens: raw.usage.output_tokens }) }, aiLogId: logId });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Provider evaluation failed. No synthetic replacement.';
+          journal.update(logId, stage === 'validation' ? { status: 'rejected', validation: { ok: false, error: message }, answers: request ? explainAnswers(request.questions, raw?.answers) : undefined } : { status: 'error', error: { code: 'PROVIDER_ERROR', message }, http: request ? httpOf(trace) : trace });
+          return json(res, 502, { error: message });
+        }
         finally { active--; }
       }
       if (req.method === 'POST' && url.pathname === '/api/draft') {
         // Optional drafting engine: editable text only, never a judgment, approval or write. Same guards as Jev routes.
         const origins = new Set([`http://127.0.0.1:${port}`, `http://localhost:${port}`]);
         if (!origins.has(req.headers.origin) || req.headers['x-essentiel-request'] !== '1') return json(res, 403, { error: 'Origin or protection header rejected.', code: 'ORIGIN_REJECTED' });
-        if (!drafter.describe().configured) return json(res, 503, { error: 'No drafting engine is configured (DRAFT_ENGINE). No draft was requested.', code: 'DRAFT_NOT_CONFIGURED' });
+        const offered = drafter.describe(), engines = offeredEngines(offered);
+        if (!engines.some(e => e.configured)) return json(res, 503, { error: 'No drafting engine is configured (DRAFT_ENGINES or DRAFT_ENGINE). No draft was requested.', code: 'DRAFT_NOT_CONFIGURED' });
         if (active >= 2) return json(res, 429, { error: 'Two model requests are already running.', code: 'BUSY' });
         const body = await readJson(req);
         if (body.consent !== true) return json(res, 400, { error: 'Explicit transmission consent is required.', code: 'CONSENT_REQUIRED' });
         let request; try { request = validateDraftRequest(body); } catch (error) { return json(res, 400, { error: error.message, code: error.code || 'INVALID_DRAFT_REQUEST' }); }
+        const chosen = engines.find(e => e.configured && e.id === (request.engine || offered.default || engines.find(x => x.configured).id));
+        if (!chosen) return json(res, 400, { error: 'This drafting engine is not configured on this server. No draft was requested.', code: 'DRAFT_ENGINE_UNAVAILABLE' });
         const now = Date.now();
         while (calls.length && calls[0] < now - 60_000) calls.shift();
         if (calls.length >= 60) return json(res, 429, { error: 'Local limit: 60 logical model requests per minute.', code: 'RATE_LIMITED' });
         calls.push(now); active++;
-        try { return json(res, 200, await drafter.draft(request)); }
-        // Engine output, stderr and provider bodies are never reflected; only fixed messages and codes.
-        catch (error) { return json(res, error instanceof DraftError ? error.status : 502, { error: error instanceof DraftError ? error.message : 'Drafting failed. No draft substituted.', code: error instanceof DraftError ? error.code : 'DRAFT_FAILED' }); }
+        const trace = {};
+        const logId = journal.start({ route: url.pathname, kind: 'draft.' + request.kind, engine: engineOf({ engine: chosen.id, local: chosen.local }), source: sourceOf(body), label: request.kind, modelRequested: chosen.model || '', request: { engine: chosen.id, kind: request.kind, lang: request.lang, instructions: request.instructions, text: request.text } });
+        try { const out = await drafter.draft({ ...request, engine: chosen.id }, trace); journal.update(logId, { status: 'ok', modelReturned: out.model || '', usage: draftUsage(trace), ...(Number.isFinite(trace.result?.total_cost_usd) ? { costUsd: trace.result.total_cost_usd } : {}), exchange: trace, result: { draft: out.draft, notes: out.notes } }); return json(res, 200, { ...out, aiLogId: logId }); }
+        // Engine output, stderr and provider bodies are never reflected; only fixed messages and codes. They stay in the local journal.
+        catch (error) {
+          const code = error instanceof DraftError ? error.code : 'DRAFT_FAILED', message = error instanceof DraftError ? error.message : 'Drafting failed. No draft substituted.';
+          journal.update(logId, { status: ['DRAFT_TOOL_USE', 'DRAFT_INVALID', 'DRAFT_RESPONSE_LIMIT'].includes(code) ? 'rejected' : 'error', error: { code, message }, usage: draftUsage(trace), exchange: trace });
+          return json(res, error instanceof DraftError ? error.status : 502, { error: message, code, aiLogId: logId });
+        }
         finally { active--; }
       }
       if (req.method === 'POST' && url.pathname === '/api/analyze') {
@@ -193,14 +250,23 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
         if (calls.length >= 60) return json(res, 429, { error: 'Limite locale de 60 analyses par minute atteinte.' });
         calls.push(now);
         active++;
+        const state = buildState(item, candidates), trace = {};
+        const logId = journal.start({ route: url.pathname, kind: 'typesafe.analyze', engine: 'TypeSafe Jev', source: sourceOf(body), label: item.title, modelRequested: model, request: { endpoint: JEV_ENDPOINT, method: 'POST', body: { model, state, questions } } });
+        let raw, stage = 'provider';
         try {
-          const raw = await provider({ apiKey, model, state: buildState(item, candidates), questions });
+          raw = await provider({ apiKey, model, state, questions, trace });
+          journal.update(logId, { response: raw, rawResponse: rawOf(trace), http: httpOf(trace), modelReturned: typeof raw?.model === 'string' ? raw.model : '', usage: raw?.usage ?? null });
+          stage = 'validation';
           const answers = validateAnswers(raw, questions);
-          return json(res, 200, { record: applyPolicy(item, candidates, answers, {
+          const record = applyPolicy(item, candidates, answers, {
             today: body.today, model: typeof raw.model === 'string' ? raw.model : model, usage: raw.usage, goals
-          }) });
+          });
+          journal.update(logId, { status: 'ok', validation: { ok: true, checks: 'answer contract, probability sums, argmax' }, answers: explainAnswers(questions, answers), result: record });
+          return json(res, 200, { record, aiLogId: logId });
         } catch (error) {
-          return json(res, 200, { record: failedRecord(item, error instanceof Error ? error.message : 'Analyse interrompue.') });
+          const message = error instanceof Error ? error.message : 'Analyse interrompue.';
+          journal.update(logId, stage === 'validation' ? { status: 'rejected', validation: { ok: false, error: message }, answers: explainAnswers(questions, raw?.answers) } : { status: 'error', error: { code: 'PROVIDER_ERROR', message }, http: httpOf(trace) });
+          return json(res, 200, { record: failedRecord(item, message), aiLogId: logId });
         } finally { active--; }
       }
       return json(res, 404, { error: 'Route introuvable.' });
@@ -210,6 +276,8 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
     }
   });
   server.drafter = drafter;
+  server.journal = journal;
+  server.connected = connected;
   server.requestTimeout = 60_000;
   server.headersTimeout = 10_000;
   return server;

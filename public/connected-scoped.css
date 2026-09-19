@@ -161,3 +161,31 @@
 .connected-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;background:var(--accent-2);border:1px solid var(--line);border-radius:var(--radius);margin:0 0 20px}.connected-entry p{margin:4px 0 0;font-size:13px;color:var(--muted)}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.top-search{width:150px}.connected-scope .cards{grid-template-columns:1fr}}
 @media(max-width:700px){.main{width:100%}.topbar{flex-wrap:wrap;height:auto;min-height:66px;padding:10px 0}.connected-scope .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.connected-scope .service-status-row{align-items:flex-start;flex-wrap:wrap}}
+/* AI log: exact Jev and drafting-engine exchanges. */
+.connected-scope .ailog-filter{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:0 0 16px}
+.connected-scope .ailog-filter label{min-width:170px}
+.connected-scope .ailog{display:grid;grid-template-columns:minmax(260px,1fr) minmax(0,2fr);gap:18px;align-items:start}
+.connected-scope .ailog-list{padding:8px;max-height:75vh;overflow:auto}
+.connected-scope .ailog-row{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);border-radius:var(--small-radius);padding:10px 12px;color:inherit}
+.connected-scope .ailog-row:hover{background:var(--surface-alt)}
+.connected-scope .ailog-row.active{background:var(--accent-soft)}
+.connected-scope .ailog-row-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.connected-scope .ailog-row-label{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.connected-scope .ailog-detail{min-width:0}
+.connected-scope .ailog-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.connected-scope .ailog-title{margin:18px 0 8px}
+.connected-scope .ailog-answer{border:1px solid var(--line);border-radius:var(--small-radius);padding:12px 14px;margin:10px 0}
+.connected-scope .ailog-answer-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.connected-scope .ailog-choice{font-weight:600;margin:6px 0}
+.connected-scope .prob-line{display:grid;grid-template-columns:minmax(0,2fr) minmax(80px,1fr) 64px;gap:10px;align-items:center;font-size:13px;padding:3px 6px;border-radius:6px}
+.connected-scope .prob-line.chosen{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.connected-scope .prob-line progress{width:100%;height:10px;accent-color:var(--accent)}
+.connected-scope .prob-line strong{text-align:right;font-variant-numeric:tabular-nums}
+.connected-scope .ailog-block{margin:10px 0}
+.connected-scope .ailog-block summary{cursor:pointer;font-weight:600;font-size:13px}
+.connected-scope .ailog-block pre{max-height:420px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:900px){.connected-scope .ailog{grid-template-columns:1fr}.connected-scope .ailog-list{max-height:40vh}}
+/* Message display: readable text by default, optional isolated formatted frame. */
+.connected-scope .mail-text{max-height:60vh;word-break:break-word;font-size:14px;line-height:1.6}
+.connected-scope .mail-toggle{margin-top:12px}
+.connected-scope .mail-frame{display:block;width:100%;height:60vh;border:1px solid var(--line);border-radius:var(--small-radius);background:#fff;margin:14px 0}
