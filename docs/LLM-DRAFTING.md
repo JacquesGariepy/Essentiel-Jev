@@ -60,13 +60,14 @@ DRAFT_ENGINE=claude
 Essentiel runs it as follows. The flags were checked against `claude --help` for Claude Code 2.1.278:
 
 ```text
-claude -p --output-format json --json-schema <draft schema> --tools "" --restricted
+claude -p --output-format json --json-schema <draft schema> --tools "" --restricted --safe-mode
        --strict-mcp-config --no-session-persistence --disable-slash-commands
        --permission-mode dontAsk --system-prompt <fixed drafting rules> [--model …] [--max-budget-usd …]
 ```
 
 - `--tools ""` removes every built-in tool.
 - `--restricted` ignores user, project and local settings files (and their hooks).
+- `--safe-mode` disables customizations: your `CLAUDE.md` files, memory, skills, plugins, hooks, custom agents and output styles.
 - `--strict-mcp-config` without `--mcp-config` loads no MCP server.
 - The message text is sent on **stdin**, never as a command-line argument.
 - Existing sign-in is reused through `CLAUDE_CONFIG_DIR` (when set) or the default location, and `ANTHROPIC_API_KEY` is passed if it is set.
@@ -102,7 +103,14 @@ After you click **Suggest a reply** or **Summarize** in a message, a preview sho
 3. your optional instruction (at most 500 characters);
 4. the edited excerpt (at most 8,000 characters), placed between `<<<SOURCE` and `SOURCE>>>`.
 
-No account address, other message, attachment, calendar, task, token or Jev result is added.
+Essentiel adds no other message, attachment, calendar, task, OAuth token or Jev result.
+
+**What the CLIs add on their own.** These are part of the CLI, not of Essentiel, and cannot be switched off while you use your subscription sign-in (Claude Code's `--bare` mode removes them but requires `ANTHROPIC_API_KEY`). They go only to the provider you are signed in to. Observed on this machine on 2026-09-19:
+
+- **Claude Code** (even with `--safe-mode`): the signed-in account's **email address**, the operating system, the date, and the temporary working directory path, which contains your Windows user name.
+- **Codex**: the temporary working directory path, the shell, the date and the time zone. No account or email address.
+
+Because a model could infer your name from that context, the drafting rules forbid adding a name or signature that is not in your instruction; the draft uses `[signature]` instead.
 
 ## What comes back
 

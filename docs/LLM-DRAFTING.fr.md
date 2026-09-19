@@ -60,13 +60,14 @@ DRAFT_ENGINE=claude
 Essentiel l'exécute ainsi. Les options ont été vérifiées avec `claude --help` pour Claude Code 2.1.278 :
 
 ```text
-claude -p --output-format json --json-schema <schéma du brouillon> --tools "" --restricted
+claude -p --output-format json --json-schema <schéma du brouillon> --tools "" --restricted --safe-mode
        --strict-mcp-config --no-session-persistence --disable-slash-commands
        --permission-mode dontAsk --system-prompt <règles fixes de rédaction> [--model …] [--max-budget-usd …]
 ```
 
 - `--tools ""` retire tous les outils intégrés.
 - `--restricted` ignore les fichiers de réglages utilisateur, projet et local, ainsi que leurs hooks.
+- `--safe-mode` désactive les personnalisations : vos fichiers `CLAUDE.md`, la mémoire, les compétences, plugins, hooks, agents personnalisés et styles de sortie.
 - `--strict-mcp-config` sans `--mcp-config` ne charge aucun serveur MCP.
 - Le texte du message passe par **l'entrée standard**, jamais par la ligne de commande.
 - La connexion existante est réutilisée via `CLAUDE_CONFIG_DIR` s'il est défini, ou via l'emplacement par défaut. `ANTHROPIC_API_KEY` est transmis s'il est défini.
@@ -102,7 +103,14 @@ Après **Proposer une réponse** ou **Résumer** dans un message, un aperçu mon
 3. votre consigne facultative (500 caractères au maximum) ;
 4. l'extrait modifié (8 000 caractères au maximum), placé entre `<<<SOURCE` et `SOURCE>>>`.
 
-Aucune adresse de compte, aucun autre message, pièce jointe, calendrier, tâche, jeton ou résultat Jev n'est ajouté.
+Essentiel n'ajoute aucun autre message, pièce jointe, calendrier, tâche, jeton OAuth ni résultat Jev.
+
+**Ce que les CLI ajoutent d'eux-mêmes.** Cela fait partie du CLI, pas d'Essentiel, et ne peut pas être désactivé avec une connexion par abonnement (le mode `--bare` de Claude Code le retire, mais exige `ANTHROPIC_API_KEY`). Ces informations vont seulement au fournisseur auquel vous êtes connecté. Observé sur ce poste le 2026-09-19 :
+
+- **Claude Code** (même avec `--safe-mode`) : l'**adresse courriel** du compte connecté, le système d'exploitation, la date et le chemin du dossier de travail temporaire, qui contient votre nom d'utilisateur Windows.
+- **Codex** : le chemin du dossier de travail temporaire, le shell, la date et le fuseau horaire. Aucun compte ni adresse courriel.
+
+Comme un modèle pourrait en déduire votre nom, les règles de rédaction interdisent d'ajouter un nom ou une signature absents de votre consigne ; le brouillon utilise `[signature]` à la place.
 
 ## Ce qui revient
 

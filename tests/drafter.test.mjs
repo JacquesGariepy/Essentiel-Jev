@@ -82,7 +82,7 @@ test('drafter: Claude Code runs without tools, MCP, settings or session, prompt 
   assert.equal(seen.options.shell, false); assert.equal(seen.options.windowsHide, true); assert.equal(seen.options.env.TYPESAFE_API_KEY, undefined);
   assert.notEqual(path.resolve(seen.options.cwd), repo); assert.ok(path.resolve(seen.options.cwd).startsWith(path.resolve(os.tmpdir()))); assert.equal(existsSync(seen.options.cwd), false);
   const toolsAt = seen.args.indexOf('--tools');
-  assert.equal(seen.args[toolsAt + 1], ''); for (const flag of ['-p', '--restricted', '--strict-mcp-config', '--no-session-persistence', '--disable-slash-commands', '--json-schema']) assert.ok(seen.args.includes(flag), flag);
+  assert.equal(seen.args[toolsAt + 1], ''); for (const flag of ['-p', '--restricted', '--safe-mode', '--strict-mcp-config', '--no-session-persistence', '--disable-slash-commands', '--json-schema']) assert.ok(seen.args.includes(flag), flag);
   assert.deepEqual(seen.args, claudeArgs({ model: '', budget: '' }));
 });
 
