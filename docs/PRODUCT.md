@@ -44,7 +44,7 @@ Ces extensions doivent être livrées par résultat, pas par logos de connecteur
 
 ### Rôle de Jev
 
-Jev juge un état via Choice, Score et Noul. Il peut aider à classer, orienter ou signaler une incertitude. Le code valide les contrats, applique les règles déterministes, calcule le temps et réalise les appels autorisés. Une personne approuve les changements. Un éventuel modèle génératif distinct pourrait rédiger un texte ; il n'est pas fourni dans ce lot. Une probabilité ou une confiance élevée ne devient jamais un mandat d'agir.
+Jev juge un état via Choice, Score et Noul. Il peut aider à classer, orienter ou signaler une incertitude. Le code valide les contrats, applique les règles déterministes, calcule le temps et réalise les appels autorisés. Une personne approuve les changements. Un modèle génératif distinct et facultatif (API compatible OpenAI, LLM local, Claude Code ou Codex) peut rédiger un brouillon ou un résumé à relire, avec son propre aperçu et consentement ; il ne juge pas, ne remplace pas une réponse Jev et n'autorise rien ([rédaction assistée](LLM-DRAFTING.fr.md)). Une probabilité ou une confiance élevée ne devient jamais un mandat d'agir.
 
 ## English
 
@@ -68,7 +68,7 @@ Start with one useful account, progressive permissions and one verified operatio
 
 ### Next capabilities must close real loops
 
-Relevant draft generation requires a separate generative model, conversation context, native threading and review. Reliable follow-up needs durable synchronization, authorized notifications and external closure evidence. Subscription cancellation needs a supported service interface and explicit confirmation of cancellation. Household support needs separate identities, individual consent and object-level sharing. Administrative submissions need authentic documents, authorized endpoints and receipt semantics. Financial integrations need authorized providers, region coverage and carefully bounded consent; no autonomous transfers are implied.
+A separate, optional drafting engine now writes editable single-message drafts and summaries (see `LLM-DRAFTING.md`). Relevant replies still require conversation context, native threading and live review. Reliable follow-up needs durable synchronization, authorized notifications and external closure evidence. Subscription cancellation needs a supported service interface and explicit confirmation of cancellation. Household support needs separate identities, individual consent and object-level sharing. Administrative submissions need authentic documents, authorized endpoints and receipt semantics. Financial integrations need authorized providers, region coverage and carefully bounded consent; no autonomous transfers are implied.
 
 None of those capabilities is implemented merely by describing it. The release criterion is a working provider-backed workflow with permission, failure and live-account tests, not an integration logo or an agent prompt.
 

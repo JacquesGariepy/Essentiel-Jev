@@ -15,7 +15,7 @@ This is a local, single-user developer application, not a security-audited consu
 
 ## Implemented controls
 
-OAuth authorization code with S256 PKCE; cryptographically random state; browser-bound HttpOnly SameSite=Lax cookie; short-lived, single-use callback; fixed provider endpoints; no arbitrary HTTP proxy; granted-scope capability checks; code exchange and token refresh only on the Node server. Application keys are not returned by status. Browser APIs require a custom header and writes require the matching Origin. Static files are served through an allowlist. `.env`, vault files and arbitrary paths are not exposed by static routes.
+OAuth authorization code with S256 PKCE; cryptographically random state; browser-bound HttpOnly SameSite=Lax cookie; short-lived, single-use callback; fixed Google, Microsoft and TypeSafe endpoints; the optional drafting endpoint is chosen by the operator in `.env` (https, or http on loopback only), never by the browser; no arbitrary HTTP proxy; granted-scope capability checks; code exchange and token refresh only on the Node server. Application keys are not returned by status. Browser APIs require a custom header and writes require the matching Origin. Static files are served through an allowlist. `.env`, vault files and arbitrary paths are not exposed by static routes.
 
 Only selected read capabilities are requested; writes require additional explicit grants. External writes are limited to drafts, personal time blocks, task creation and task completion. Each proposal has a fixed account/target/content, expiring approval hash and explicit human consent. Model outputs and source text are data, never shell commands, tool permissions or OAuth instructions. This is not a general autonomous action engine.
 
@@ -30,6 +30,14 @@ Provider JSON is untrusted. Only recognized reason codes, bounded HTTP/status/ca
 Read-access probes are capability-gated and make minimal GET requests only. They do not enable APIs, grant scopes, certify writes or bypass organizational restrictions. Locking/disconnecting retains existing guards; no access test implies consent for a write.
 
 The unified interface uses scoped connected handlers/styles and one parent router, not an iframe. Local and connected persistence remain separate; neither is silently mirrored into the other. A shared theme or menu does not establish shared access rights.
+
+## Optional drafting engines
+
+`DRAFT_ENGINE` is off by default. When enabled, `POST /api/draft` sends only the excerpt edited in the preview, an optional instruction and fixed drafting rules, after explicit consent. It applies the same Origin, header and rate limits as the Jev routes. Output must be `{draft, notes}` within fixed bounds. Tool calls, extra fields and malformed JSON are refused, and nothing is substituted. Provider bodies and CLI stderr are not returned to the browser.
+
+Claude Code runs with `--tools ""`, `--restricted`, `--strict-mcp-config`, `--no-session-persistence`, `--disable-slash-commands` and `--permission-mode dontAsk`. Codex runs `exec` with a read-only sandbox, `--ephemeral`, `--ignore-user-config`, `--ignore-rules`, its shell and other agent tools disabled, and web search disabled. `--dangerously-bypass-approvals-and-sandbox` is never used.
+
+Both CLIs are spawned without a shell, in a new empty temporary directory, with an allowlisted environment. `TYPESAFE_API_KEY`, OAuth secrets and `LLM_API_KEY` are not passed. Output and time are bounded. A reported tool attempt, permission denial, sub-agent or web request refuses the draft. Detecting a reported event is not the same as preventing its first side effect; the protection is that no tool is granted (Claude Code) or that the shell tool is disabled in a read-only sandbox (Codex). The CLIs use the person's own sign-in; their providers' terms and retention apply.
 
 ## Persistence and local trust
 

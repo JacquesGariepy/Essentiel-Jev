@@ -26,7 +26,9 @@ Human approval -> fresh source/state/calendar checks -> official provider write
 Returned provider object ID -> explicit GET read-back -> receipt/status
 ```
 
-Optional TypeSafe branch: displayed source excerpt -> separate consent -> typed judgment -> displayed assessment. It has no execution authority. Local workspace/laboratory share the main shell with connected views; their data stores remain separate.
+Optional TypeSafe branch: displayed source excerpt -> separate consent -> typed judgment -> displayed assessment. It has no execution authority.
+
+Optional drafting branch: displayed source excerpt -> separate consent -> operator-configured drafting engine (OpenAI-compatible HTTP, local LLM, Claude Code or Codex CLI) -> validated `{draft, notes}` -> editable composer. It neither judges nor executes. Saving the draft still goes through the immutable preview, explicit approval and read-back above. Jev remains the only typed judge. Local workspace/laboratory share the main shell with connected views; their data stores remain separate.
 
 ## Modules
 
@@ -42,6 +44,7 @@ Optional TypeSafe branch: displayed source excerpt -> separate consent -> typed 
 | `lib/connected/provider-errors.mjs` | Allowlisted provider diagnostics and fixed Google console URLs |
 | `public/app.js`, `public/core.js`, `public/systemone.js` | Existing local tools and System One lab |
 | `lib/provider.mjs`, `lib/domain.mjs`, `lib/questions.mjs` | Existing TypeSafe adapter, typed validation, deterministic policy |
+| `lib/drafter.mjs` | Optional drafting engines: OpenAI-compatible HTTP, Claude Code and Codex CLI children; `{draft, notes}` validation; no judgment or write authority |
 
 ## Unified navigation
 
@@ -71,7 +74,7 @@ All `/api/connected/*` calls require `X-Essentiel-Request: 1`. All POST calls al
 | POST `/api/connected/disconnect` | Remove local account data, not remote OAuth grant |
 | POST `/api/connected/vault` | Unlock/persist, lock or explicitly erase local connected data |
 
-The legacy `/api/config`, `/api/models`, `/api/analyze`, `/api/evaluate`, `/api/demo` routes remain. Demo routes belong to legacy explicit fixtures; the connected page never silently calls them to populate an empty account.
+The legacy `/api/config`, `/api/models`, `/api/analyze`, `/api/evaluate`, `/api/demo` routes remain. `POST /api/draft` returns an editable draft or summary from the optional drafting engine. It uses the same Origin, custom header, JSON, explicit consent and shared 2-concurrent / 60-per-minute limits as `/api/analyze`. `/api/config` describes the drafting engine (`engine`, `model`, `local`, `configured`) without its key, URL or command. Demo routes belong to legacy explicit fixtures; the connected page never silently calls them to populate an empty account.
 
 ## Operation state and guarantees
 
@@ -96,5 +99,7 @@ Sync retains per-service last-success timestamps and cached data, records the cu
 ## Extension contract
 
 A new connector needs fixed endpoint origins, explicit capability/scopes, typed normalization, visible coverage/pagination limits, consent setup documentation, bounded reads, an exact target preview, freshness checking, idempotency analysis, receipt semantics, failure tests and a real-account acceptance report. A logo, mock fixture, MCP tool schema or generic browser controller is not a completed connector.
+
+A drafting engine is operator-configured in `.env`, never supplied by the browser. HTTP engines use https, or http on loopback only, with redirects refused. They need structured output validated locally, bounded responses and time, and fixed error messages that never reflect provider bodies. CLI engines run with `shell: false`, no tools, a fresh empty temporary directory, the prompt on stdin, an allowlisted environment, capped output and a kill on timeout. A reported tool attempt refuses the draft. A drafting engine never substitutes for a Jev answer and never gains write authority.
 
 Before hosted/multiuser use, build authentication, tenant isolation, HTTPS deployment, managed secret encryption, session controls, background job durability, revocation lifecycle, abuse controls and production monitoring. None is implied by the local prototype.

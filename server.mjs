@@ -10,6 +10,7 @@ import { buildQuestions, buildState } from './lib/questions.mjs';
 import { askJev, listJevModels } from './lib/provider.mjs';
 import { validateRequest, validateTypedAnswers, SYSTEMONE_LIMITS } from './public/systemone.js';
 import { demoRecords, DEMO_GOALS } from './lib/demo.mjs';
+import { createDrafter, validateDraftRequest, DraftError } from './lib/drafter.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 if (existsSync(path.join(root, '.env'))) process.loadEnvFile(path.join(root, '.env'));
@@ -46,7 +47,7 @@ async function readJson(req) {
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new Error('JSON invalide.'); }
 }
 
-export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model = process.env.JEV_MODEL || 'jev-1.13.0', provider = askJev, modelsProvider = listJevModels, connectorOptions = {} } = {}) {
+export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model = process.env.JEV_MODEL || 'jev-1.13.0', provider = askJev, modelsProvider = listJevModels, drafter = createDrafter(), connectorOptions = {} } = {}) {
   const connected = new ConnectedService({ filename: path.join(root, '.data', 'connected.vault'), ...connectorOptions });
   let active = 0;
   const calls = [];
@@ -128,7 +129,7 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
       }
       if (req.method === 'GET' && url.pathname === '/api/config') {
         return json(res, 200, { configured: Boolean(apiKey), model, ruleset: RULESET_VERSION,
-          nativeEndpoint: 'api.typesafe.ai', retention: 'Legacy workspace: browser-only. Connected accounts: server memory or optional encrypted local vault', maxTextLength: 8000, systemOneLimits: SYSTEMONE_LIMITS, maxRequestBytes: 350000, automaticExternalActions: false });
+          nativeEndpoint: 'api.typesafe.ai', retention: 'Legacy workspace: browser-only. Connected accounts: server memory or optional encrypted local vault', maxTextLength: 8000, systemOneLimits: SYSTEMONE_LIMITS, maxRequestBytes: 350000, automaticExternalActions: false, draft: drafter.describe() });
       }
       if (req.method === 'GET' && url.pathname === '/api/demo') {
         const today = url.searchParams.get('today');
@@ -155,6 +156,24 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
           if (!raw.usage || !Number.isSafeInteger(raw.usage.input_tokens) || raw.usage.input_tokens < 0 || (raw.usage.output_tokens !== undefined && (!Number.isSafeInteger(raw.usage.output_tokens) || raw.usage.output_tokens < 0))) throw new Error('Invalid provider token usage.');
           return json(res, 200, { model: raw.model, answers, usage: { input_tokens: raw.usage.input_tokens, ...(raw.usage.output_tokens === undefined ? {} : { output_tokens: raw.usage.output_tokens }) } });
         } catch (error) { return json(res, 502, { error: error instanceof Error ? error.message : 'Provider evaluation failed. No synthetic replacement.' }); }
+        finally { active--; }
+      }
+      if (req.method === 'POST' && url.pathname === '/api/draft') {
+        // Optional drafting engine: editable text only, never a judgment, approval or write. Same guards as Jev routes.
+        const origins = new Set([`http://127.0.0.1:${port}`, `http://localhost:${port}`]);
+        if (!origins.has(req.headers.origin) || req.headers['x-essentiel-request'] !== '1') return json(res, 403, { error: 'Origin or protection header rejected.', code: 'ORIGIN_REJECTED' });
+        if (!drafter.describe().configured) return json(res, 503, { error: 'No drafting engine is configured (DRAFT_ENGINE). No draft was requested.', code: 'DRAFT_NOT_CONFIGURED' });
+        if (active >= 2) return json(res, 429, { error: 'Two model requests are already running.', code: 'BUSY' });
+        const body = await readJson(req);
+        if (body.consent !== true) return json(res, 400, { error: 'Explicit transmission consent is required.', code: 'CONSENT_REQUIRED' });
+        let request; try { request = validateDraftRequest(body); } catch (error) { return json(res, 400, { error: error.message, code: error.code || 'INVALID_DRAFT_REQUEST' }); }
+        const now = Date.now();
+        while (calls.length && calls[0] < now - 60_000) calls.shift();
+        if (calls.length >= 60) return json(res, 429, { error: 'Local limit: 60 logical model requests per minute.', code: 'RATE_LIMITED' });
+        calls.push(now); active++;
+        try { return json(res, 200, await drafter.draft(request)); }
+        // Engine output, stderr and provider bodies are never reflected; only fixed messages and codes.
+        catch (error) { return json(res, error instanceof DraftError ? error.status : 502, { error: error instanceof DraftError ? error.message : 'Drafting failed. No draft substituted.', code: error instanceof DraftError ? error.code : 'DRAFT_FAILED' }); }
         finally { active--; }
       }
       if (req.method === 'POST' && url.pathname === '/api/analyze') {
@@ -190,6 +209,7 @@ export function createApp({ apiKey = process.env.TYPESAFE_API_KEY || '', model =
       res.end();
     }
   });
+  server.drafter = drafter;
   server.requestTimeout = 60_000;
   server.headersTimeout = 10_000;
   return server;
@@ -203,6 +223,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
     console.log(`Essentiel: http://localhost:${port} (also available on 127.0.0.1)`);
     console.log('Connected cockpit: Google and Microsoft OAuth apps must be configured; no accounts are preconnected.');
     console.log(process.env.TYPESAFE_API_KEY ? 'Native TypeSafe API configured. Sending requires explicit browser consent.' : 'No TypeSafe key: connected tools still work; no live Jev inference.');
+    const draft = app.drafter?.describe?.();
+    console.log(draft?.configured ? `Drafting engine: ${draft.engine}${draft.model ? ' / ' + draft.model : ''} (optional, consent per request, drafts only).` : 'No drafting engine (DRAFT_ENGINE=none): Jev judgments and connected tools are unaffected.');
   });
   app.on('error', (error) => { console.error(`Server error: ${error.code || 'unknown'}`); process.exitCode = 1; });
 }
