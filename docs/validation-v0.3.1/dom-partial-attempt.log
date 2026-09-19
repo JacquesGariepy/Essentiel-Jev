@@ -1,0 +1,19 @@
+PASS: Two explicitly synthetic accounts load through real local HTTP after mocked OAuth callbacks
+PASS: All six connected views render
+PASS: Independent connection capabilities and calendar/task-list choices render; auto-refresh starts off
+PASS: Loaded-mail filter has a genuine empty state without synthetic fallback
+PASS: Full plain-text source opens; missing Jev key cannot trigger a pretend model result
+PASS: Source-linked draft is only a proposal before explicit approval
+PASS: Google draft write and provider-ID read-back work through the UI with a synthetic upstream
+PASS: Source-linked Microsoft To Do task creation preserves the selected target and calendar date
+PASS: Completing a provider task requires approval and a verified completed state
+PASS: Available-time search cross-checks the two selected calendar accounts
+PASS: Personal time block is created after a fresh conflict check; receipt is visible
+PASS: Google Drive and OneDrive searches display returned metadata and native links
+PASS: Journal records each approved operation and supports read-back without repeating the write
+PASS: Explicit receipt export excludes tokens; download transport is a test double
+PASS: English and dark-mode switches preserve connected data and actions
+PASS: 390px mobile view fits without page-level horizontal overflow
+PASS: Opt-in encrypted vault writes ciphertext to the actual local file without plaintext tokens or message addresses
+PASS: Lock removes connected data from the rendered workspace
+PASS: Unlock restores encrypted connections and approved-operation records

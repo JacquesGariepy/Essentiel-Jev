@@ -1,0 +1,728 @@
+
+> essentiel-jev@0.3.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: connected: unconfigured connectors stay disconnected; no fake accounts
+ok 1 - connected: unconfigured connectors stay disconnected; no fake accounts
+  ---
+  duration_ms: 8.139177
+  type: 'test'
+  ...
+# Subtest: connected: least-privilege OAuth request has PKCE, state, browser binding, no write scope
+ok 2 - connected: least-privilege OAuth request has PKCE, state, browser binding, no write scope
+  ---
+  duration_ms: 1.707923
+  type: 'test'
+  ...
+# Subtest: connected: OAuth rejects forged state and browser cookie
+ok 3 - connected: OAuth rejects forged state and browser cookie
+  ---
+  duration_ms: 1.626704
+  type: 'test'
+  ...
+# Subtest: connected: OAuth code exchange stores server tokens, prevents replay and honors actual grants
+ok 4 - connected: OAuth code exchange stores server tokens, prevents replay and honors actual grants
+  ---
+  duration_ms: 4.858449
+  type: 'test'
+  ...
+# Subtest: connected: OAuth cannot silently replace a different account
+ok 5 - connected: OAuth cannot silently replace a different account
+  ---
+  duration_ms: 2.621619
+  type: 'test'
+  ...
+# Subtest: connected: OAuth denial consumes state without connecting
+ok 6 - connected: OAuth denial consumes state without connecting
+  ---
+  duration_ms: 1.1143
+  type: 'test'
+  ...
+# Subtest: connected: concurrent expiry checks refresh a token only once
+ok 7 - connected: concurrent expiry checks refresh a token only once
+  ---
+  duration_ms: 4.092613
+  type: 'test'
+  ...
+# Subtest: connected: synchronize both mailboxes, calendars and task lists through provider adapters
+ok 8 - connected: synchronize both mailboxes, calendars and task lists through provider adapters
+  ---
+  duration_ms: 10.118476
+  type: 'test'
+  ...
+# Subtest: connected: errors retain previous sources and are not reported as empty inboxes
+ok 9 - connected: errors retain previous sources and are not reported as empty inboxes
+  ---
+  duration_ms: 4.866302
+  type: 'test'
+  ...
+# Subtest: connected: document search reaches Google Drive and OneDrive endpoints
+ok 10 - connected: document search reaches Google Drive and OneDrive endpoints
+  ---
+  duration_ms: 4.896505
+  type: 'test'
+  ...
+# Subtest: connected: remote links and pagination cannot leave the provider allowlist
+ok 11 - connected: remote links and pagination cannot leave the provider allowlist
+  ---
+  duration_ms: 1.228849
+  type: 'test'
+  ...
+# Subtest: connected: preview does not write; execution requires exact hash and explicit approval
+ok 12 - connected: preview does not write; execution requires exact hash and explicit approval
+  ---
+  duration_ms: 4.119722
+  type: 'test'
+  ...
+# Subtest: connected: real adapter task creation is read back; repeated action IDs cannot write twice
+ok 13 - connected: real adapter task creation is read back; repeated action IDs cannot write twice
+  ---
+  duration_ms: 3.514803
+  type: 'test'
+  ...
+# Subtest: connected: Microsoft To Do creation uses the selected list and date-only semantics
+ok 14 - connected: Microsoft To Do creation uses the selected list and date-only semantics
+  ---
+  duration_ms: 10.86513
+  type: 'test'
+  ...
+# Subtest: connected: creating drafts never calls a send endpoint
+ok 15 - connected: creating drafts never calls a send endpoint
+  ---
+  duration_ms: 2.471647
+  type: 'test'
+  ...
+# Subtest: connected: mail header injection and multiple recipients are rejected before writes
+ok 16 - connected: mail header injection and multiple recipients are rejected before writes
+  ---
+  duration_ms: 0.93781
+  type: 'test'
+  ...
+# Subtest: connected: forged sources cannot be used to authorize actions
+ok 17 - connected: forged sources cannot be used to authorize actions
+  ---
+  duration_ms: 1.164003
+  type: 'test'
+  ...
+# Subtest: connected: changed source blocks action before external write
+ok 18 - connected: changed source blocks action before external write
+  ---
+  duration_ms: 2.975869
+  type: 'test'
+  ...
+# Subtest: connected: expired previews and missing write permissions are rejected
+ok 19 - connected: expired previews and missing write permissions are rejected
+  ---
+  duration_ms: 2.719912
+  type: 'test'
+  ...
+# Subtest: connected: bounded free-time calculation merges overlaps and preserves uncertainty outside scope
+ok 20 - connected: bounded free-time calculation merges overlaps and preserves uncertainty outside scope
+  ---
+  duration_ms: 0.464784
+  type: 'test'
+  ...
+# Subtest: connected: all-day Google events retain calendar timezone and DST boundaries
+ok 21 - connected: all-day Google events retain calendar timezone and DST boundaries
+  ---
+  duration_ms: 15.576958
+  type: 'test'
+  ...
+# Subtest: connected: fresh calendar conflict prevents a time-block creation
+ok 22 - connected: fresh calendar conflict prevents a time-block creation
+  ---
+  duration_ms: 5.02219
+  type: 'test'
+  ...
+# Subtest: connected: incomplete calendar pagination blocks availability instead of inventing free time
+ok 23 - connected: incomplete calendar pagination blocks availability instead of inventing free time
+  ---
+  duration_ms: 4.433945
+  type: 'test'
+  ...
+# Subtest: connected: time blocks use provider IDs and no participants, invitations or reminders
+ok 24 - connected: time blocks use provider IDs and no participants, invitations or reminders
+  ---
+  duration_ms: 2.329268
+  type: 'test'
+  ...
+# Subtest: connected: Microsoft calendar creates and verifies a personal event
+ok 25 - connected: Microsoft calendar creates and verifies a personal event
+  ---
+  duration_ms: 2.177014
+  type: 'test'
+  ...
+# Subtest: connected: completing tasks checks current version and verifies provider status
+ok 26 - connected: completing tasks checks current version and verifies provider status
+  ---
+  duration_ms: 1.756835
+  type: 'test'
+  ...
+# Subtest: connected: concurrent task edits block completion before patching
+ok 27 - connected: concurrent task edits block completion before patching
+  ---
+  duration_ms: 1.536471
+  type: 'test'
+  ...
+# Subtest: connected: ambiguous write failure stays uncertain and is never automatically retried
+ok 28 - connected: ambiguous write failure stays uncertain and is never automatically retried
+  ---
+  duration_ms: 5.147465
+  type: 'test'
+  ...
+# Subtest: connected: failed read-back keeps returned object ID and can be verified without another write
+ok 29 - connected: failed read-back keeps returned object ID and can be verified without another write
+  ---
+  duration_ms: 1.281396
+  type: 'test'
+  ...
+# Subtest: connected: encrypted persistence contains no readable tokens or source contents
+ok 30 - connected: encrypted persistence contains no readable tokens or source contents
+  ---
+  duration_ms: 136.792862
+  type: 'test'
+  ...
+# Subtest: connected: a process interrupted during execution reopens as uncertain, not pending
+ok 31 - connected: a process interrupted during execution reopens as uncertain, not pending
+  ---
+  duration_ms: 81.172715
+  type: 'test'
+  ...
+# Subtest: connected: local disconnect removes credentials and cache without claiming provider revocation
+ok 32 - connected: local disconnect removes credentials and cache without claiming provider revocation
+  ---
+  duration_ms: 4.871328
+  type: 'test'
+  ...
+# Subtest: connected: memory-only mode writes no file; erase removes encrypted persistence
+ok 33 - connected: memory-only mode writes no file; erase removes encrypted persistence
+  ---
+  duration_ms: 37.355192
+  type: 'test'
+  ...
+# Subtest: connected: vault changes are refused while a connector operation is active
+ok 34 - connected: vault changes are refused while a connector operation is active
+  ---
+  duration_ms: 0.759678
+  type: 'test'
+  ...
+# Subtest: connected HTTP: status and writes require the same-origin protection header
+ok 35 - connected HTTP: status and writes require the same-origin protection header
+  ---
+  duration_ms: 26.233465
+  type: 'test'
+  ...
+# Subtest: connected HTTP: OAuth cross-site callback is validated and sanitized; full fixture sync runs through HTTP
+ok 36 - connected HTTP: OAuth cross-site callback is validated and sanitized; full fixture sync runs through HTTP
+  ---
+  duration_ms: 13.532394
+  type: 'test'
+  ...
+# Subtest: connected HTTP: production default never silently enters a synthetic mode
+ok 37 - connected HTTP: production default never silently enters a synthetic mode
+  ---
+  duration_ms: 11.796069
+  type: 'test'
+  ...
+# Subtest: connected: invalid normalized calendar days and times are rejected
+ok 38 - connected: invalid normalized calendar days and times are rejected
+  ---
+  duration_ms: 0.283488
+  type: 'test'
+  ...
+# Subtest: connected: folded MIME subject preserves Unicode and encoded-word bounds
+ok 39 - connected: folded MIME subject preserves Unicode and encoded-word bounds
+  ---
+  duration_ms: 0.195057
+  type: 'test'
+  ...
+# Subtest: connected: disappearance of any selected calendar blocks availability
+ok 40 - connected: disappearance of any selected calendar blocks availability
+  ---
+  duration_ms: 1.679051
+  type: 'test'
+  ...
+# Subtest: connected: disappearance of selected task list never silently substitutes another list
+ok 41 - connected: disappearance of selected task list never silently substitutes another list
+  ---
+  duration_ms: 1.88227
+  type: 'test'
+  ...
+# Subtest: connected: source-linked Google draft re-reads unchanged source successfully
+ok 42 - connected: source-linked Google draft re-reads unchanged source successfully
+  ---
+  duration_ms: 4.667469
+  type: 'test'
+  ...
+# Subtest: ISO validation rejects impossible dates and accepts leap day
+ok 43 - ISO validation rejects impossible dates and accepts leap day
+  ---
+  duration_ms: 1.244462
+  type: 'test'
+  ...
+# Subtest: date arithmetic is deterministic across month and year boundaries
+ok 44 - date arithmetic is deterministic across month and year boundaries
+  ---
+  duration_ms: 1.135541
+  type: 'test'
+  ...
+# Subtest: normalizer rejects empty and oversized documents
+ok 45 - normalizer rejects empty and oversized documents
+  ---
+  duration_ms: 0.438195
+  type: 'test'
+  ...
+# Subtest: exact duplicate fingerprint normalizes CRLF but preserves case and meaning
+ok 46 - exact duplicate fingerprint normalizes CRLF but preserves case and meaning
+  ---
+  duration_ms: 0.530801
+  type: 'test'
+  ...
+# Subtest: goals are bounded and explicit
+ok 47 - goals are bounded and explicit
+  ---
+  duration_ms: 0.769983
+  type: 'test'
+  ...
+# Subtest: candidate passages are verbatim and dates are validated in code
+ok 48 - candidate passages are verbatim and dates are validated in code
+  ---
+  duration_ms: 9.262771
+  type: 'test'
+  ...
+# Subtest: oversized passage sets are rejected, not silently truncated
+ok 49 - oversized passage sets are rejected, not silently truncated
+  ---
+  duration_ms: 0.574756
+  type: 'test'
+  ...
+# Subtest: valid structured responses are accepted
+ok 50 - valid structured responses are accepted
+  ---
+  duration_ms: 0.725297
+  type: 'test'
+  ...
+# Subtest: missing answers are rejected
+ok 51 - missing answers are rejected
+  ---
+  duration_ms: 0.484443
+  type: 'test'
+  ...
+# Subtest: unknown choices and non-finite confidence are rejected
+ok 52 - unknown choices and non-finite confidence are rejected
+  ---
+  duration_ms: 0.572062
+  type: 'test'
+  ...
+# Subtest: malformed distributions and out-of-range nouls are rejected
+ok 53 - malformed distributions and out-of-range nouls are rejected
+  ---
+  duration_ms: 0.392568
+  type: 'test'
+  ...
+# Subtest: choice must agree with the maximum probability
+ok 54 - choice must agree with the maximum probability
+  ---
+  duration_ms: 0.268815
+  type: 'test'
+  ...
+# Subtest: pending request routes to act, with date still unconfirmed
+ok 55 - pending request routes to act, with date still unconfirmed
+  ---
+  duration_ms: 0.470032
+  type: 'test'
+  ...
+# Subtest: low certainty never routes to automatic action
+ok 56 - low certainty never routes to automatic action
+  ---
+  duration_ms: 0.222558
+  type: 'test'
+  ...
+# Subtest: sensitive requests and manipulation route to review
+ok 57 - sensitive requests and manipulation route to review
+  ---
+  duration_ms: 0.286702
+  type: 'test'
+  ...
+# Subtest: relative dates are not fabricated
+ok 58 - relative dates are not fabricated
+  ---
+  duration_ms: 0.240444
+  type: 'test'
+  ...
+# Subtest: unrelated selected date is an inconsistency, not an accepted deadline
+ok 59 - unrelated selected date is an inconsistency, not an accepted deadline
+  ---
+  duration_ms: 0.782421
+  type: 'test'
+  ...
+# Subtest: completed requests stay available without being automatically archived
+ok 60 - completed requests stay available without being automatically archived
+  ---
+  duration_ms: 0.397355
+  type: 'test'
+  ...
+# Subtest: contradictory action and status are escalated
+ok 61 - contradictory action and status are escalated
+  ---
+  duration_ms: 0.319269
+  type: 'test'
+  ...
+# Subtest: conditional requests and missing evidence require review
+ok 62 - conditional requests and missing evidence require review
+  ---
+  duration_ms: 0.256898
+  type: 'test'
+  ...
+# Subtest: provider failures are visible, never replaced by demonstration data
+ok 63 - provider failures are visible, never replaced by demonstration data
+  ---
+  duration_ms: 0.219734
+  type: 'test'
+  ...
+# Subtest: all demonstration records carry explicit synthetic provenance
+ok 64 - all demonstration records carry explicit synthetic provenance
+  ---
+  duration_ms: 0.999401
+  type: 'test'
+  ...
+# Subtest: browser-compatible source IDs and 200-character titles survive normalization
+ok 65 - browser-compatible source IDs and 200-character titles survive normalization
+  ---
+  duration_ms: 0.100237
+  type: 'test'
+  ...
+# Subtest: no key means no network call
+ok 66 - no key means no network call
+  ---
+  duration_ms: 0.99921
+  type: 'test'
+  ...
+# Subtest: native adapter uses documented endpoint and payload
+ok 67 - native adapter uses documented endpoint and payload
+  ---
+  duration_ms: 17.929886
+  type: 'test'
+  ...
+# Subtest: 401 is not retried and raw provider content is not exposed
+ok 68 - 401 is not retried and raw provider content is not exposed
+  ---
+  duration_ms: 0.379438
+  type: 'test'
+  ...
+# Subtest: 429 retries once and respects an in-budget Retry-After
+ok 69 - 429 retries once and respects an in-budget Retry-After
+  ---
+  duration_ms: 1.023135
+  type: 'test'
+  ...
+# Subtest: repeated rate limit stops after two attempts
+ok 70 - repeated rate limit stops after two attempts
+  ---
+  duration_ms: 0.465956
+  type: 'test'
+  ...
+# Subtest: invalid JSON and network failures are explicit
+ok 71 - invalid JSON and network failures are explicit
+  ---
+  duration_ms: 0.421791
+  type: 'test'
+  ...
+# Subtest: long Retry-After stops without retrying earlier than the provider allows
+ok 72 - long Retry-After stops without retrying earlier than the provider allows
+  ---
+  duration_ms: 0.422732
+  type: 'test'
+  ...
+# Subtest: config exposes presence, never key, and no persistent input store
+ok 73 - config exposes presence, never key, and no persistent input store
+  ---
+  duration_ms: 25.503381
+  type: 'test'
+  ...
+# Subtest: missing key disables real inference
+ok 74 - missing key disables real inference
+  ---
+  duration_ms: 9.627938
+  type: 'test'
+  ...
+# Subtest: cross-origin requests and wrong host are rejected
+ok 75 - cross-origin requests and wrong host are rejected
+  ---
+  duration_ms: 5.851662
+  type: 'test'
+  ...
+# Subtest: explicit data transmission consent is required
+ok 76 - explicit data transmission consent is required
+  ---
+  duration_ms: 3.996271
+  type: 'test'
+  ...
+# Subtest: static paths are allowlisted and headers restrict executable content
+ok 77 - static paths are allowlisted and headers restrict executable content
+  ---
+  duration_ms: 6.89066
+  type: 'test'
+  ...
+# Subtest: mocked successful analysis traverses validation and policy
+ok 78 - mocked successful analysis traverses validation and policy
+  ---
+  duration_ms: 14.713914
+  type: 'test'
+  ...
+# Subtest: provider failure remains a failed analysis, not a synthetic success
+ok 79 - provider failure remains a failed analysis, not a synthetic success
+  ---
+  duration_ms: 4.249364
+  type: 'test'
+  ...
+# Subtest: demo endpoint is explicitly marked synthetic
+ok 80 - demo endpoint is explicitly marked synthetic
+  ---
+  duration_ms: 5.486554
+  type: 'test'
+  ...
+# Subtest: all three native primitives traverse the local route with a mock provider
+ok 81 - all three native primitives traverse the local route with a mock provider
+  ---
+  duration_ms: 30.527565
+  type: 'test'
+  ...
+# Subtest: malformed questions, missing consent and external origins do not call provider
+ok 82 - malformed questions, missing consent and external origins do not call provider
+  ---
+  duration_ms: 10.501033
+  type: 'test'
+  ...
+# Subtest: provider answer-type errors fail closed without replacement output
+ok 83 - provider answer-type errors fail closed without replacement output
+  ---
+  duration_ms: 4.218778
+  type: 'test'
+  ...
+# Subtest: model lookup is an explicit authenticated metadata action
+ok 84 - model lookup is an explicit authenticated metadata action
+  ---
+  duration_ms: 6.306451
+  type: 'test'
+  ...
+# Subtest: version-two browser modules are served without exposing source env
+ok 85 - version-two browser modules are served without exposing source env
+  ---
+  duration_ms: 13.220115
+  type: 'test'
+  ...
+# Subtest: strict calendar dates reject rollover and unsupported years
+ok 86 - strict calendar dates reject rollover and unsupported years
+  ---
+  duration_ms: 1.50885
+  type: 'test'
+  ...
+# Subtest: week begins on Monday without locale or DST drift
+ok 87 - week begins on Monday without locale or DST drift
+  ---
+  duration_ms: 0.591601
+  type: 'test'
+  ...
+# Subtest: monthly recurrence preserves the day anchor through February
+ok 88 - monthly recurrence preserves the day anchor through February
+  ---
+  duration_ms: 0.195567
+  type: 'test'
+  ...
+# Subtest: missing dependencies and dependency cycles are rejected
+ok 89 - missing dependencies and dependency cycles are rejected
+  ---
+  duration_ms: 0.787239
+  type: 'test'
+  ...
+# Subtest: completion requires resolved dependencies and checked substeps
+ok 90 - completion requires resolved dependencies and checked substeps
+  ---
+  duration_ms: 0.43529
+  type: 'test'
+  ...
+# Subtest: recurrence creates a single child and skips missed occurrences
+ok 91 - recurrence creates a single child and skips missed occurrences
+  ---
+  duration_ms: 0.444334
+  type: 'test'
+  ...
+# Subtest: planner respects reserve, energy, dependencies and snooze without deleting
+ok 92 - planner respects reserve, energy, dependencies and snooze without deleting
+  ---
+  duration_ms: 6.8082
+  type: 'test'
+  ...
+# Subtest: routine scheduling uses explicit weekdays and respects pause/start
+ok 93 - routine scheduling uses explicit weekdays and respects pause/start
+  ---
+  duration_ms: 0.354421
+  type: 'test'
+  ...
+# Subtest: money parsing uses integer minor units and rejects fractional excess
+ok 94 - money parsing uses integer minor units and rejects fractional excess
+  ---
+  duration_ms: 0.46165
+  type: 'test'
+  ...
+# Subtest: monthly arithmetic separates currencies and recurring estimates
+ok 95 - monthly arithmetic separates currencies and recurring estimates
+  ---
+  duration_ms: 0.59101
+  type: 'test'
+  ...
+# Subtest: savings projection is arithmetic and handles no contributions
+ok 96 - savings projection is arithmetic and handles no contributions
+  ---
+  duration_ms: 0.17664
+  type: 'test'
+  ...
+# Subtest: weighted choice ranks eligible options before high-scoring constraint failures
+ok 97 - weighted choice ranks eligible options before high-scoring constraint failures
+  ---
+  duration_ms: 0.410234
+  type: 'test'
+  ...
+# Subtest: missing score or cost cannot become an eligible decision
+ok 98 - missing score or cost cannot become an eligible decision
+  ---
+  duration_ms: 0.169109
+  type: 'test'
+  ...
+# Subtest: CSV round-trips commas, quotes, newlines and shields spreadsheet formulas
+ok 99 - CSV round-trips commas, quotes, newlines and shields spreadsheet formulas
+  ---
+  duration_ms: 0.465736
+  type: 'test'
+  ...
+# Subtest: money CSV validates exact schema and ISO dates before import
+ok 100 - money CSV validates exact schema and ISO dates before import
+  ---
+  duration_ms: 0.313972
+  type: 'test'
+  ...
+# Subtest: ICS has exclusive next-day end, escaped content and UTF-8 folding
+ok 101 - ICS has exclusive next-day end, escaped content and UTF-8 folding
+  ---
+  duration_ms: 0.60463
+  type: 'test'
+  ...
+# Subtest: external backup import strips inference trust and proposed deadlines
+ok 102 - external backup import strips inference trust and proposed deadlines
+  ---
+  duration_ms: 6.466216
+  type: 'test'
+  ...
+# Subtest: dangerous JSON keys, oversized data and duplicate identities are rejected
+ok 103 - dangerous JSON keys, oversized data and duplicate identities are rejected
+  ---
+  duration_ms: 0.356585
+  type: 'test'
+  ...
+# Subtest: encrypted export round-trips, has random salts and rejects tamper/wrong password
+ok 104 - encrypted export round-trips, has random salts and rejects tamper/wrong password
+  ---
+  duration_ms: 272.491643
+  type: 'test'
+  ...
+# Subtest: all 28 spaces have four bilingual, actionable four-step workflows
+ok 105 - all 28 spaces have four bilingual, actionable four-step workflows
+  ---
+  duration_ms: 0.737986
+  type: 'test'
+  ...
+# Subtest: FR and EN demo data normalize into valid complete workspaces
+ok 106 - FR and EN demo data normalize into valid complete workspaces
+  ---
+  duration_ms: 5.832844
+  type: 'test'
+  ...
+# Subtest: all literal UI vocabulary lookups exist in both languages
+ok 107 - all literal UI vocabulary lookups exist in both languages
+  ---
+  duration_ms: 5.088248
+  type: 'test'
+  ...
+# Subtest: System One attention contract accepts its synthetic typed fixture
+ok 108 - System One attention contract accepts its synthetic typed fixture
+  ---
+  duration_ms: 0.773068
+  type: 'test'
+  ...
+# Subtest: System One refund contract accepts its synthetic typed fixture
+ok 109 - System One refund contract accepts its synthetic typed fixture
+  ---
+  duration_ms: 0.0951
+  type: 'test'
+  ...
+# Subtest: System One evidence contract accepts its synthetic typed fixture
+ok 110 - System One evidence contract accepts its synthetic typed fixture
+  ---
+  duration_ms: 0.710585
+  type: 'test'
+  ...
+# Subtest: System One list contract accepts its synthetic typed fixture
+ok 111 - System One list contract accepts its synthetic typed fixture
+  ---
+  duration_ms: 0.104363
+  type: 'test'
+  ...
+# Subtest: native contract accepts string/object/array and structured criteria, rejects media-like numbers
+ok 112 - native contract accepts string/object/array and structured criteria, rejects media-like numbers
+  ---
+  duration_ms: 0.178032
+  type: 'test'
+  ...
+# Subtest: malformed, empty, excessive and single-level questions are rejected
+ok 113 - malformed, empty, excessive and single-level questions are rejected
+  ---
+  duration_ms: 0.379939
+  type: 'test'
+  ...
+# Subtest: choice distributions require complete normalization and a winning choice
+ok 114 - choice distributions require complete normalization and a winning choice
+  ---
+  duration_ms: 0.267033
+  type: 'test'
+  ...
+# Subtest: Score must match the weighted mean and exact descriptive legend
+ok 115 - Score must match the weighted mean and exact descriptive legend
+  ---
+  duration_ms: 0.27195
+  type: 'test'
+  ...
+# Subtest: Noul carries its own probability, review gates never permit an action
+ok 116 - Noul carries its own probability, review gates never permit an action
+  ---
+  duration_ms: 0.207135
+  type: 'test'
+  ...
+# Subtest: calibration observations exclude synthetic/imported runs and partition versions
+ok 117 - calibration observations exclude synthetic/imported runs and partition versions
+  ---
+  duration_ms: 0.555547
+  type: 'test'
+  ...
+# Subtest: refund example combines structured judgments and code without executing
+ok 118 - refund example combines structured judgments and code without executing
+  ---
+  duration_ms: 0.207255
+  type: 'test'
+  ...
+# Subtest: Choice supports 255 named alternatives and rejects a 256th
+ok 119 - Choice supports 255 named alternatives and rejects a 256th
+  ---
+  duration_ms: 1.239855
+  type: 'test'
+  ...
+1..119
+# tests 119
+# suites 0
+# pass 119
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 613.658206
