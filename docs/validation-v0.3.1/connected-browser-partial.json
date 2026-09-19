@@ -1,0 +1,9 @@
+{
+  "status": "partial",
+  "completedChecks": 19,
+  "expectedChecks": 22,
+  "fullSuitePassed": false,
+  "reason": "The subsequent erase/empty-state sequence did not finish before execution time limit. No overall pass is claimed.",
+  "browserMode": "Injected HTML/CSS/JS; controlled fetch bridge to real local HTTP server; synthetic provider APIs",
+  "nativeBrowserOAuthTested": false
+}

@@ -1,0 +1,78 @@
+{
+  "name": "Essentiel",
+  "version": "0.3.2",
+  "date": "2026-09-19",
+  "languages": [
+    "fr",
+    "en"
+  ],
+  "runtime": "Node.js >=22; no npm runtime dependencies",
+  "baseline": {
+    "filename": "Essentiel-Jev-v0.3.1.zip",
+    "sha256": "79dd7143f87adac2e63f424b04170036dbb63847c86def2f04e998883dd9a968"
+  },
+  "entrypoints": {
+    "application": "/",
+    "legacyAlias": "/workspace",
+    "html": "public/index.html",
+    "connectedMail": "/#connected-inbox",
+    "connections": "/#connections",
+    "start": "npm start",
+    "guideFrench": "README.fr.md",
+    "guideEnglish": "README.md",
+    "troubleshootingFrench": "docs/GOOGLE_403.fr.md",
+    "troubleshootingEnglish": "docs/GOOGLE_403.md",
+    "agent": "START_HERE.md"
+  },
+  "implemented": {
+    "oauthProviders": [
+      "google",
+      "microsoft"
+    ],
+    "nativeSurfaces": [
+      "Gmail",
+      "Google Calendar",
+      "Google Tasks",
+      "Google Drive",
+      "Outlook",
+      "Outlook Calendar",
+      "Microsoft To Do",
+      "OneDrive"
+    ],
+    "writeKinds": [
+      "draft",
+      "event",
+      "task",
+      "complete_task"
+    ],
+    "optionalVaultEncryption": true,
+    "systemOnePrimitives": [
+      "choice",
+      "score",
+      "noul"
+    ],
+    "legacyDomains": 28,
+    "legacyWorkflows": 112,
+    "googleOAuthClientTypes": [
+      "web",
+      "desktop"
+    ],
+    "unifiedShell": true,
+    "readOnlyServiceDiagnostics": true
+  },
+  "validation": {
+    "nodeTestsPassed": 157,
+    "newDiagnosticRegressionTests": 21,
+    "localBrowserChecksPassed": 34,
+    "unifiedBrowserChecksPassed": 17,
+    "syntheticProviderTransport": true,
+    "nativeBrowserOAuthNavigationTested": false,
+    "realProviderAccountsTested": false,
+    "liveTypeSafeInferenceTested": false,
+    "publicOAuthVerificationCompleted": false,
+    "productionSecurityAuditCompleted": false,
+    "nativeBrowserNavigationAttempt": "ERR_BLOCKED_BY_ADMINISTRATOR; UI tested by explicit injection and local HTTP bridge",
+    "nativeWindowsBinaryBuilt": false,
+    "browserStorageHistoryDownloads": "explicit test shims"
+  }
+}

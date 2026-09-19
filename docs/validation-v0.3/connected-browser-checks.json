@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "count": 22,
+  "checks": [
+    "Two explicitly synthetic accounts load through real local HTTP after mocked OAuth callbacks",
+    "All six connected views render",
+    "Independent connection capabilities and calendar/task-list choices render; auto-refresh starts off",
+    "Loaded-mail filter has a genuine empty state without synthetic fallback",
+    "Full plain-text source opens; missing Jev key cannot trigger a pretend model result",
+    "Source-linked draft is only a proposal before explicit approval",
+    "Google draft write and provider-ID read-back work through the UI with a synthetic upstream",
+    "Source-linked Microsoft To Do task creation preserves the selected target and calendar date",
+    "Completing a provider task requires approval and a verified completed state",
+    "Available-time search cross-checks the two selected calendar accounts",
+    "Personal time block is created after a fresh conflict check; receipt is visible",
+    "Google Drive and OneDrive searches display returned metadata and native links",
+    "Journal records each approved operation and supports read-back without repeating the write",
+    "Explicit receipt export excludes tokens; download transport is a test double",
+    "English and dark-mode switches preserve connected data and actions",
+    "390px mobile view fits without page-level horizontal overflow",
+    "Opt-in encrypted vault writes ciphertext to the actual local file without plaintext tokens or message addresses",
+    "Lock removes connected data from the rendered workspace",
+    "Unlock restores encrypted connections and approved-operation records",
+    "Explicit erase clears the local vault; no remote deletion or OAuth revocation is claimed",
+    "Legacy local workspace remains served at /workspace",
+    "No uncaught browser JavaScript errors"
+  ],
+  "uncaught_errors": [],
+  "limitations": [
+    "Managed Chromium refused localhost URL navigation (ERR_BLOCKED_BY_ADMINISTRATOR). Unchanged application HTML, CSS and JavaScript were injected for DOM testing.",
+    "Browser fetch was bridged to the real local Node HTTP server with a controlled test transport; native browser origin/CORS behavior was not exercised by these DOM checks. HTTP defenses are tested independently in Node.",
+    "Google/Microsoft upstream responses and OAuth consent/token exchange were synthetic test fixtures, explicitly marked TEST. No real account, live provider acceptance or Jev inference was validated.",
+    "sessionStorage and receipt-download transport are explicit test doubles. Vault cryptography, file writes and HTTP application actions were executed.",
+    "No claim of production security audit, public OAuth verification, mobile device deployment or end-user usability evidence."
+  ]
+}

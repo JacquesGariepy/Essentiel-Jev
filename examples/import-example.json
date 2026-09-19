@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Confirmation demandée",
+    "source": "Exemple fictif à analyser, sans résultat prédéfini",
+    "text": "Bonjour, merci de confirmer votre présence à notre atelier avant le 2026-10-05. Aucune pièce d’identité n’est demandée.",
+    "receivedAt": "2026-09-19",
+    "synthetic": true
+  },
+  {
+    "title": "Simple information",
+    "source": "Exemple fictif à analyser, sans résultat prédéfini",
+    "text": "Votre demande est terminée. Ce courriel est une confirmation et ne nécessite aucune réponse.",
+    "receivedAt": "2026-09-19",
+    "synthetic": true
+  }
+]

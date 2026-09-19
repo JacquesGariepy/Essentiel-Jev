@@ -1,0 +1,13 @@
+.env
+.data/
+node_modules/
+*.log
+playwright-artifacts/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Local OAuth client downloads must never be packaged or committed.
+google-oauth.json
+client_secret*.json
+.credentials/

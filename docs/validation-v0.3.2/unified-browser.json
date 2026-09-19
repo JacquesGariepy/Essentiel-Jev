@@ -1,0 +1,32 @@
+{
+  "count": 17,
+  "checks": [
+    "One shared application shell; a personal task is created in memory",
+    "Google and Microsoft fixture messages render inside the existing workspace shell without horizontal overflow",
+    "All 16 local and connected routes render with one shared navigation",
+    "Local in-memory task survives navigation across all connected views without a reload",
+    "The local laboratory shortcut remains hash-only and retains local in-memory work",
+    "Theme and FR/EN language are shared between local and connected views, without double event handlers",
+    "Source-linked Google draft still requires exact preview, human approval and read-back; no message sent",
+    "Connected task completion retains approval and verified state in the unified shell",
+    "Calendar availability and approved personal time-block creation retain existing behavior",
+    "Document search remains operational without reading file bodies",
+    "Four read-only service probes and diagnostic export work without exposing tokens or message content",
+    "Mobile personal, mail and connections views fit a 390-pixel viewport",
+    "Three synthetic Google 403 refusals display unavailable data, not successful zero counts or an empty inbox",
+    "SERVICE_DISABLED fixture errors identify the service and reported project with safe Google Cloud links",
+    "Account identification is distinct from four failed API access checks",
+    "Actionable provider diagnostics translate to English and remain usable at mobile width",
+    "No uncaught JavaScript errors in healthy and Google-403 integration scenarios"
+  ],
+  "uncaughtErrors": [],
+  "realAccountsTested": false,
+  "upstream": "synthetic",
+  "loopbackBrowserNavigation": "attempted separately; ERR_BLOCKED_BY_ADMINISTRATOR",
+  "limitations": [
+    "Injected DOM and module packaging; dynamic import resolved through a test module binding.",
+    "Fetch bridged to real local HTTP with synthetic upstream APIs.",
+    "Browser history origin, storage and download mechanics use test shims.",
+    "No Google or Microsoft account, actual OAuth browser redirect, paid TypeSafe inference or Windows installation tested."
+  ]
+}

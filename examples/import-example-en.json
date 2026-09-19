@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Confirmation requested",
+    "source": "Fictional text for analysis; no predefined inference",
+    "text": "Hello, please confirm your attendance at our workshop before 2026-10-05. No identity document is requested.",
+    "receivedAt": "2026-09-19",
+    "synthetic": true
+  },
+  {
+    "title": "Information only",
+    "source": "Fictional text for analysis; no predefined inference",
+    "text": "Your request is complete. This message confirms completion and does not require a reply.",
+    "receivedAt": "2026-09-19",
+    "synthetic": true
+  }
+]

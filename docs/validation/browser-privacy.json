@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "count": 4,
+  "checks": [
+    "Late source results preserve manual classification and date confirmed during the request",
+    "Erasing during a pending source request prevents late source resurrection",
+    "Erasing during a pending lab request prevents late run resurrection",
+    "Three consented requests were isolated to controlled test doubles; no uncaught errors"
+  ],
+  "uncaught_errors": [],
+  "limitations": [
+    "All fetch, storage and provider responses are controlled test doubles.",
+    "No native inference, provider cancellation, retention or credential behavior is established."
+  ]
+}

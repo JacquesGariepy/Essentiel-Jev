@@ -1,0 +1,14 @@
+{
+  "version": "0.3.0",
+  "provider": "synthetic",
+  "realGoogleAccount": false,
+  "callbackStatus": 303,
+  "landingStatus": 403,
+  "landingError": "Requête intersite refusée.",
+  "accountStored": true,
+  "navigationHeaders": {
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Dest": "document"
+  }
+}

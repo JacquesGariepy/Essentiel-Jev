@@ -1,0 +1,8 @@
+{
+  "attempted": true,
+  "passed": false,
+  "stage": "initial localhost page navigation",
+  "error": "net::ERR_BLOCKED_BY_ADMINISTRATOR",
+  "providerNetwork": "synthetic test transport only; no live Google account",
+  "policyModified": false
+}

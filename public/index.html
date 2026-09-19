@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Essentiel: a local, bilingual daily workspace. Tasks, plans, money, lists and source-grounded System One decisions.">
+  <title>Essentiel — Your daily workspace</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/connected-scoped.css">
+  <link rel="modulepreload" href="/connected.js">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a href="#content" class="skip-link" id="skipLink">Aller au contenu / Skip to content</a>
+  <div id="app"></div>
+  <dialog id="modal" aria-labelledby="modalTitle"><div id="modalContent"></div></dialog>
+  <div id="connectedOverlays" class="connected-scope"><dialog id="dialog" aria-labelledby="dialogTitle"><div id="dialogBody"></div></dialog><div id="notice" class="toast" role="status" aria-live="polite" hidden></div></div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript>Essentiel needs JavaScript. No data is sent automatically. / JavaScript est nécessaire. Aucune donnée n’est transmise automatiquement.</noscript>
+</body>
+</html>

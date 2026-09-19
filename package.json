@@ -1,0 +1,17 @@
+{
+  "name": "essentiel-jev",
+  "version": "0.3.2",
+  "private": true,
+  "description": "Bilingual local connected email, calendar, task and document workflows, with approved native writes and optional System One judgments.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "preview": "node scripts/build-preview.mjs",
+    "test:browser": "python tests/unified-browser-check.py",
+    "test:oauth-browser": "python tests/oauth-browser-check.py"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Essentiel",
+  "version": "0.2.0",
+  "date": "2026-09-19",
+  "languages": [
+    "fr",
+    "en"
+  ],
+  "runtime": "Node.js >=22; no npm runtime dependencies",
+  "baseline": {
+    "filename": "Essentiel-Jev-v0.1.zip",
+    "sha256": "dc8fa2e75ec8ee769a889ba2613c1d5425b18c4e636ca06214e2634012752a72"
+  },
+  "coverage": {
+    "lifeDomains": 28,
+    "workflows": 112,
+    "editableStepsPerLanguage": 448,
+    "systemOnePrimitives": [
+      "choice",
+      "score",
+      "noul"
+    ]
+  },
+  "validation": {
+    "nodeTestsPassed": 77,
+    "browserWorkflowChecksPassed": 34,
+    "browserPrivacyChecksPassed": 4,
+    "liveTypeSafeInferenceTested": false,
+    "browserTransportDoublesDocumented": true
+  },
+  "entrypoints": {
+    "server": "npm start",
+    "frenchPreview": "preview-fr.html",
+    "englishPreview": "preview-en.html",
+    "englishGuide": "README.md",
+    "frenchGuide": "README.fr.md",
+    "agentHandoff": "START_HERE.md"
+  }
+}
